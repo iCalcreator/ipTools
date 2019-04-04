@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ package ipTools
+
+ Provides IP v4/v6
+   validation:
+     IP in IP/network(CIDR) ranges
+   and util services:
+     is valid IP,
+     expand/compress IP number
+     IP number to binary and reverse
+     netmask/cidr etc
+
+ With courtesy of and inspiration from Paul Gregg <pgregg@pgregg.com>
+ and the excellent functions decbin32 and ip_in_range
+
+ copyright (c) 2019 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ Link      https://kigkonsult.se
+ Package   ipTools
+ Version   1.0
+ License   Subject matter of licence is the software ipTools.
+           The above copyright, link, package and version notices and
+           this licence notice shall be included in all copies or
+           substantial portions of the ipTools.
+
+           ipTools is free software: you can redistribute it and/or modify
+           it under the terms of the GNU Lesser General Public License as published
+           by the Free Software Foundation, either version 3 of the License,
+           or (at your option) any later version.
+
+           ipTools is distributed in the hope that it will be useful,
+           but WITHOUT ANY WARRANTY; without even the implied warranty of
+           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+           GNU Lesser General Public License for more details.
+
+           You should have received a copy of the GNU Lesser General Public License
+           along with ipTools. If not, see <https://www.gnu.org/licenses/>.
+
+ This file is a part of ipTools
+-->
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         syntaxCheck="false"
+         bootstrap="autoload.php"
+>
+    <testsuites>
+        <testsuite name="IpTool test">
+            <file>test/IpToolsTest.php</file>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist
+                addUncoveredFilesFromWhitelist="true"
+                processUncoveredFilesFromWhitelist="true"
+        >
+            <file>src/IpTool.php</file>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="testDocs/PHPUnitCoverage" lowUpperBound="35" highLowerBound="70"/>
+        <!--
+        <log type="coverage-clover" target="testDocs/testCoverage.xml"/>
+        <log type="coverage-php"    target="testDocs/testCoverage.php"/>
+        <log type="coverage-text"   target="testDocs/PHPUnitReport.txt" showUncoveredFiles="false"/>
+        <log type="json"            target="testDocs/PHPUnitReport.json"/>
+        <log type="tap"             target="testDocs/PHPUnitReport.tap"/>
+        <log type="junit"           target="testDocs/PHPUnitReport.xml" logIncompleteSkipped="false"/>
+        <log type="testdox-html"    target="testDocs/PHPUnitReport.testdox.html"/>
+        <log type="testdox-text"    target="testDocs/PHPUnitReport.testdox.txt"/>
+        -->
+    </logging>
+</phpunit>

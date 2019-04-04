@@ -1,0 +1,38 @@
+{
+    "name": "kigkonsult/ipTools",
+    "type": "library",
+    "description": "ipv4/ipv6 tools",
+    "keywords": [
+      "IP",
+      "IPnumber",
+      "IPv4",
+      "IPv6",
+      "range",
+      "verify",
+      "CIDR",
+      "block",
+      "netmask"
+    ],
+    "time" : "2018-04-04",
+    "license": "LGPLv3",
+    "homepage": "http://kigkonsult.se",
+    "support": {
+       "issues": "https://github.com/iCalcreator/ipTools/issues"
+    },
+    "authors": [
+        {
+            "name": "Kjell-Inge Gustafsson",
+            "email": "ical@kigkonsult.se"
+        }
+    ],
+    "autoload": {
+        "files": ["autoload.php"],
+        "psr-4": { "Kigkonsult\\IpTools\\": "src/" }
+    },
+    "require": {
+        "php": ">=5.6",
+        "phpunit/phpunit": "6.5.13"
+    },
+    "require-dev": {
+    }
+}
