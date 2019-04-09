@@ -1,5 +1,6 @@
 
 # ipTools
+
 > is a PHP IP number utility toolbox
 
 "Don't thrust an IP address... ", but sometime you have to deal with them..
@@ -101,7 +102,7 @@ Here you will find of IPnumber utility methods
     * on found, matchIx holds the filter range array index
     * For filters in detail, examine _IpTool::isIpv4InRange_ and _IpTool::isIpv6InRange_, below.
      
-* cidr2NetmaskBin( cidr, bitNum )
+* IpTool::cidr2NetmaskBin( cidr, bitNum )
     * Return IPv4/v6 cidr block as binary
     * bitNum:  32 (IpV4)  / 128 (IpV6)
     
@@ -111,34 +112,34 @@ Here you will find of IPnumber utility methods
 * IpTool::isValidIPv4( IpNum )
     * Return bool true on valid IPv4 number
 
-* IPv42bin( ipNum )
+* IpTool::IPv42bin( ipNum )
     * Return IPv4 number as binary
 
-* bin2IPv4( IPbin )
+* IpTool::bin2IPv4( IPbin )
     * Return binary as IPv4 number
 
-* IpTool::decbin32( dec )
+* IpTool::IpTool::decbin32( dec )
     * Return binary string (left-)padded to 32 bit numbers
       
 * IpTool::hasIPv4ValidHost( IpNum )
     * Return true if hostName exists for a valid IPv4 number and resolves back
 
-* expandIPv4( $ipNum )
+* IpTool::expandIPv4( $ipNum )
     * Return expanded IPv4 number to 4 octets
 
-* isValidIPv4Cidr( cidr )
+* IpTool::isValidIPv4Cidr( cidr )
     * Return bool true on valid IPv4 cidr
 
-* ipv4CIDR2Netmask( cidr )
+* IpTool::ipv4CIDR2Netmask( cidr )
     * Return IPv4 cidr as netmask
       
-* ipv4Netmask2Cidr( netmask )
+* IpTool::ipv4Netmask2Cidr( netmask )
     * Return IPv4 netmask as cidr
     
-* getNetworkFromIpv4Cidr( ipNum, cidr )
+* IpTool::getNetworkFromIpv4Cidr( ipNum, cidr )
     * Return IPv4 network from IPv4num and cidr
 
-* IPv4Breakout( ipAddress, ipNetmaskCidr \[, outputAsIpNum = false\] )
+* IpTool::IPv4Breakout( ipAddress, ipNetmaskCidr \[, outputAsIpNum = false\] )
     * Return array( network, firstIp, lastIP, broadcastIp ) 
     * ipNetmaskCidr = netmask or cidr
     * outputAsIpNum = false returns binary
