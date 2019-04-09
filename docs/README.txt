@@ -39,7 +39,7 @@ How to check an IPv4/v6 number is valid and in a validity range :
 $validityRange = [
     '192.168.0.1',                // specific match 
     '192.168.0.10-192.168.0.20'   // within a range
-    '192.168.1.                     // with wildcard
+    '192.168.1.*                  // with wildcard
     '192.168.2.0/25               // cidr
     '192.168.3.0/255.255.255.128' // or netmask
 ];
