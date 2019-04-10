@@ -38,6 +38,8 @@ How to check an IPv4/v6 number is valid and in a validity range :
 
 **1** Build a validity range filter
 ~~~~~~~~
+<?php
+
 $validityRange = [
     '192.168.0.1',                // specific match 
     '192.168.0.10-192.168.0.20'   // within a range
@@ -45,11 +47,15 @@ $validityRange = [
     '192.168.2.0/25               // cidr
     '192.168.3.0/255.255.255.128' // or netmask
 ];
+
 ~~~~~~~~
 For filters in detail, examine _IpTool::isIpNumInRange_, below. 
 
 **2a** 'ad hoc' check
 ~~~~~~~~
+<?php
+use Kigkonsult\IpTools\IpTool;
+
 if( ! Iptool::factory( $validityRange )->checkIPnumInRange( $IpNumToTest )) {
     echo 'error message';
 }
@@ -60,6 +66,9 @@ Format : Iptool::factory( [ filter ] )
 
 **2b** class instance check (with added filter)
 ~~~~~~~~
+<?php
+use Kigkonsult\IpTools\IpTool;
+
 $ipValidator = new Iptool( $baseFilterArr );
 ...
 $adHocFilter = '192.168.4.*';

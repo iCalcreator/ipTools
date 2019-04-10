@@ -50,6 +50,8 @@ For filters in detail, examine IpTool::isIpNumInRange, below.
 2a - 'ad hoc' check
 
 <?php
+use Kigkonsult\IpTools\IpTool;
+
 if( ! Iptool::factory( $validityRange )->checkIPnumInRange( $IpNumToTest )) {
     echo 'error message';
 }
@@ -62,6 +64,8 @@ Format : Iptool::factory( [ filter ] )
 2b - class instance check (with added filter)
 
 <?php
+use Kigkonsult\IpTools\IpTool;
+
 $ipValidator = new Iptool( $baseFilterArr );
 ...
 $adHocFilter = '192.168.4.*';
