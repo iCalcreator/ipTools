@@ -3,7 +3,7 @@
 
 > is a PHP IP number utility toolbox
 
-"Don't thrust an IP address... ", but sometime you have to deal with them..
+"Don't thrust an IP address... ", but sometime you have to deal with them.
 
 Provides IP v4/v6
 * validation: IP in IP/network(cidr) ranges

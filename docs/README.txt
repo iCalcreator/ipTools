@@ -3,7 +3,7 @@ ipTools
 
   is a PHP IP number utility toolbox
 
-"Don't thrust an IP address... ", but sometime you have to deal with them..
+"Don't thrust an IP address... ", but sometime you have to deal with them.
 
 Provides IP v4/v6
     validation: IP in IP/network(CIDR) ranges
@@ -13,6 +13,9 @@ and util services:
     IP number to binary and reverse
     netmask/cidr etc
 
+
+With courtesy of and inspiration from Paul Gregg <pgregg_at_pgregg_dot_com>
+and the excellent functions decbin32 and ip_in_range.
 
 INSTALL
 
