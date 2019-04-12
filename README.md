@@ -121,6 +121,15 @@ Here you will find of IPnumber utility methods
 * IpTool::isValidIPv4( IpNum )
     * Return bool true on valid IPv4 number
 
+* IpTool::hasIPv4port( ipNum )
+    * Return bool true if IP v4 number has trailing port
+
+* IpTool::getPv4port( ipNum )
+    * Return IP v4 port
+
+* IpTool::getPv4withoutPort( ipNum )
+    * Return IP v4 without port
+
 * IpTool::IPv42bin( ipNum )
     * Return IPv4 number as binary
 
@@ -175,6 +184,15 @@ Here you will find of IPnumber utility methods
 
 * IpTool::isValidIPv6( ipNum )
     * Return true on valid IPv6 number
+
+* IpTool::hasIPv6port( ipNum )
+    * Return bool true if IP v6 number has trailing port
+
+* IpTool::getPv6port( ipNum )
+    * Return IP v6 port
+
+* IpTool::getPv6withoutPort( ipNum )
+    * Return IP v6 without port
 
 * IpTool::isIPv4MappedIPv6( ipNum )
     * Return bool true if IP is v4 mapped IPv6

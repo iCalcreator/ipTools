@@ -17,7 +17,7 @@
  * copyright (c) 2019 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * Link      https://kigkonsult.se
  * Package   ipTools
- * Version   1.0
+ * Version   1.1.1
  * License   Subject matter of licence is the software ipTools.
  *           The above copyright, link, package and version notices and
  *           this licence notice shall be included in all copies or
@@ -65,19 +65,56 @@ class IpToolsTest extends TestCase
      * @param int    $case ,
      * @param string $ipNum
      * @param bool   $expected
+     * @param string $port
      *
      */
-    public function isValidIPv4numTest( $case, $ipNum, $expected ) {
+    public function isValidIPv4numTest( $case, $ipNum, $expected, $port ) {
         static $FMTerr = 'error %d case #%d for %s';
         $this->assertTrue(
-            $expected ==IpTool::isValidIP( $ipNum ),
+            $expected == IpTool::isValidIP( $ipNum ),
             sprintf( $FMTerr, 1, $case, $ipNum )
         );
 
         $this->assertTrue(
-            $expected ==IpTool::isValidIPv4( $ipNum ),
+            $expected == IpTool::isValidIPv4( $ipNum ),
             sprintf( $FMTerr, 2, $case, $ipNum )
         );
+
+        switch( true ) {
+            case ( ! $expected ) :
+                break;
+            case ( empty( $port ) ) :
+                $this->assertFalse(
+                    IpTool::hasIPv4port( $ipNum ),
+                    sprintf( $FMTerr, 3, $case, $ipNum )
+                );
+                $this->assertEmpty(
+                    IpTool::getPv4port( $ipNum ),
+                    sprintf( $FMTerr, 4, $case, $ipNum )
+                );
+                $this->assertEquals(
+                    $ipNum,
+                    IpTool::getPv4withoutPort( $ipNum ),
+                    sprintf( $FMTerr, 5, $case, $ipNum )
+                );
+                break;
+            default :
+                $this->assertTrue(
+                    IpTool::hasIPv4port( $ipNum ),
+                    sprintf( $FMTerr, 6, $case, $ipNum )
+                );
+                $this->assertEquals(
+                    $port,
+                    IpTool::getPv4port( $ipNum ),
+                    sprintf( $FMTerr, 7, $case, $ipNum )
+                );
+                $this->assertEquals(
+                    explode( ':', $ipNum, 2 )[0],
+                    IpTool::getPv4withoutPort( $ipNum ),
+                    sprintf( $FMTerr, 8, $case, $ipNum )
+                );
+                break;
+        } // end switch
 
     }
 
@@ -90,13 +127,29 @@ class IpToolsTest extends TestCase
         $dataArr[] = [
             1001,
             '192.168.0.1',
-            true
+            true,
+            ''
         ];
 
         $dataArr[] = [
             1002,
             '192.168.0.256',
-            false
+            false,
+            ''
+        ];
+
+        $dataArr[] = [
+            1003,
+            '192.168.0.1:1234',
+            true,
+            '1234'
+        ];
+
+        $dataArr[] = [
+            1003,
+            '192.168.0.1:abcd',
+            false,
+            ''
         ];
 
         return $dataArr;
@@ -833,13 +886,49 @@ class IpToolsTest extends TestCase
      * @param int    $case
      * @param string $ipNum
      * @param string $expected
+     * @param string $port
      */
-    public function isValidIPv6numTest( $case, $ipNum, $expected ) {
-        static $FMTerr = 'error #%d for ipNum : %s';
+    public function isValidIPv6numTest( $case, $ipNum, $expected, $port ) {
+        static $FMTerr = 'error %d case #%d for %s';
         $this->assertTrue(
             $expected == IpTool::isValidIPv6( $ipNum ),
-            sprintf( $FMTerr, $case, $ipNum )
+            sprintf( $FMTerr, 1, $case, $ipNum )
         );
+        switch( true ) {
+            case ( ! $expected ) :
+                break;
+            case ( empty( $port ) ) :
+                $this->assertFalse(
+                    IpTool::hasIPv6port( $ipNum ),
+                    sprintf( $FMTerr, 3, $case, $ipNum )
+                );
+                $this->assertEmpty(
+                    IpTool::getPv6port( $ipNum ),
+                    sprintf( $FMTerr, 4, $case, $ipNum )
+                );
+                $this->assertEquals(
+                    $ipNum,
+                    IpTool::getPv6withoutPort( $ipNum ),
+                    sprintf( $FMTerr, 5, $case, $ipNum )
+                );
+                break;
+            default :
+                $this->assertTrue(
+                    IpTool::hasIPv6port( $ipNum ),
+                    sprintf( $FMTerr, 6, $case, $ipNum )
+                );
+                $this->assertEquals(
+                    $port,
+                    IpTool::getPv6port( $ipNum ),
+                    sprintf( $FMTerr, 7, $case, $ipNum )
+                );
+                $this->assertEquals(
+                    substr( explode( ']:', trim( $ipNum, '"' ), 2 )[0], 1 ),
+                    IpTool::getPv6withoutPort( $ipNum ),
+                    sprintf( $FMTerr, 8, $case, $ipNum )
+                );
+                break;
+        } // end switch
     }
 
     public function isValidIPv6numTestProvider() {
@@ -848,43 +937,78 @@ class IpToolsTest extends TestCase
         $dataArr[] = [
             25001,
             '3ffe:f200:0234:ab00:0123:4567:8901:abcd',
-            true
+            true,
+            ''
         ];
 
         $dataArr[] = [
             25002,
             '2001:db8:abc:1400::',
-            true
+            true,
+            ''
+        ];
+
+        $dataArr[] = [
+            25003,
+            '[3ffe:f200:0234:ab00:0123:4567:8901:abcd]:1234',
+            true,
+            '1234'
+        ];
+
+        $dataArr[] = [
+            25004,
+            '[2001:db8:abc:1400::]:1234',
+            true,
+            '1234'
+        ];
+
+        $dataArr[] = [
+            25005,
+            '"[3ffe:f200:0234:ab00:0123:4567:8901:abcd]:1234"',
+            true,
+            '1234'
+        ];
+
+        $dataArr[] = [
+            25006,
+            '"[2001:db8:abc:1400::]:1234"',
+            true,
+            '1234'
         ];
 
         $dataArr[] = [
             25011,
             '3ffe:f200:0234:ab00:0123:4567:8901.abcd',      // dot
             false,
+            '',
         ];
 
         $dataArr[] = [
             25012,
             ':3ffe:f200:0234:ab00:0123:4567:8901',          // lead. :
             false,
+            '',
         ];
 
         $dataArr[] = [
             25013,
             '3ffe:f200:0234:ab00:0123:4567:8901:',          // trail. :
             false,
+            '',
         ];
 
         $dataArr[] = [
             25014,
             '0001:0002:0003:0004:0005:0006:0007',           // 7 segments
             false,
+            '',
         ];
 
         $dataArr[] = [
             25015,
             '0001:0002:0003:0004:0005:0006:0007:0008:0009', // 9 segments
             false,
+            '',
         ];
 
         return $dataArr;

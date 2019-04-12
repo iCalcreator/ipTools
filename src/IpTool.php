@@ -68,6 +68,11 @@ use function substr;
 use function substr_count;
 use function unpack;
 
+/**
+ * IpTool class
+ *
+ * @since  1.1.1 - 2019-04-12
+ */
 
 final class IpTool
 {
@@ -83,13 +88,15 @@ final class IpTool
      * @access private
      * @static
      */
-    private static $A16    = 'A16';
     private static $AST    = '*';
     private static $COLON  = ':';
     private static $COLON2 = '::';
     private static $DASH   = '-';
     private static $DOT    = '.';
+    private static $DQ     = '"';
     private static $SLASH  = '/';
+    private static $SQC    = ']:';
+    private static $SP     = '';
     private static $ZERO   = '0';
 
     /**
@@ -373,7 +380,71 @@ final class IpTool
      * @static
      */
     public static function isValidIPv4( $ipNum ) {
+        if( IpTool::hasIPv4port( $ipNum )) {
+            $ipNum = IpTool::getPv4withoutPort( $ipNum );
+        }
         return ( filter_var( $ipNum, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ));
+    }
+
+    /**
+     * Return bool true IP v4 number has trailing port
+     *
+     * @param string $ipNum
+     * @return bool
+     * @access private
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     */
+    private static function isIPv4withPort( $ipNum ) {
+        return (( 3 == substr_count( $ipNum, IpTool::$DOT )) &&
+            ( 1 == substr_count( $ipNum, IpTool::$COLON )));
+    }
+
+    /**
+     * Return bool true if IP v4 number has trailing port
+     *
+     * @param string $ipNum
+     * @return bool
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     */
+    public static function hasIPv4port( $ipNum ) {
+        if( IpTool::isIPv4withPort( $ipNum )) {
+            $ipNumparts = explode( IpTool::$COLON, $ipNum, 2 );
+            return is_numeric( $ipNumparts[1] );
+        }
+        return false;
+    }
+
+    /**
+     * Return IP v4 port
+     *
+     * @param string $ipNum
+     * @return string   port || '' on none found
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     */
+    public static function getPv4port( $ipNum ) {
+        if( IpTool::isIPv4withPort( $ipNum )) {
+            return explode( IpTool::$COLON, $ipNum, 2 )[1];
+        }
+        return IpTool::$SP;
+    }
+
+    /**
+     * Return IP v4 without port
+     *
+     * @param string $ipNum
+     * @return string
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     * @since  1.1.1 - 2019-04-12
+     */
+    public static function getPv4withoutPort( $ipNum ) {
+        if( IpTool::isIPv4withPort( $ipNum )) {
+            return explode( IpTool::$COLON, $ipNum, 2 )[0];
+        }
+        return $ipNum;
     }
 
     /**
@@ -730,7 +801,73 @@ final class IpTool
      * @static
      */
     public static function isValidIPv6( $ipNum ) {
+        echo PHP_EOL; // test ##
+        if( IpTool::hasIPv6port( $ipNum )) {
+            $ipNum = IpTool::getPv6withoutPort( $ipNum );
+        }
         return ( false !== filter_var( $ipNum, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ));
+    }
+
+    /**
+     * Return bool true IP v6 number has trailing port
+     *
+     * @param string $ipNum
+     * @return bool
+     * @access private
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     */
+    private static function isIPv6withPort( $ipNum ) {
+        $ipNum = trim( $ipNum, self::$DQ );
+        return ( 1 == substr_count( $ipNum, IpTool::$SQC ));
+    }
+
+    /**
+     * Return bool true if IP v6 number has trailing port
+     *
+     * @param string $ipNum
+     * @return bool
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     */
+    public static function hasIPv6port( $ipNum ) {
+        if( IpTool::isIPv6withPort( $ipNum )) {
+            $ipNumparts = explode( IpTool::$SQC, trim( $ipNum, self::$DQ ), 2 );
+            return ctype_digit((string) $ipNumparts[1] );
+        }
+        return false;
+    }
+
+    /**
+     * Return IP v6 port
+     *
+     * @param string $ipNum
+     * @return string   port || '' on none found
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     */
+    public static function getPv6port( $ipNum ) {
+        if( IpTool::isIPv6withPort( $ipNum )) {
+            $ipNum = trim( $ipNum, self::$DQ );
+            return explode( IpTool::$SQC, $ipNum, 2 )[1];
+        }
+        return IpTool::$SP;
+    }
+
+    /**
+     * Return IP v6 without port
+     *
+     * @param string $ipNum
+     * @return string
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     * @since  1.1.1 - 2019-04-12
+     */
+    public static function getPv6withoutPort( $ipNum ) {
+        if( IpTool::isIPv6withPort( $ipNum )) {
+            return substr( explode( IpTool::$SQC, trim( $ipNum, self::$DQ ), 2 )[0], 1 );
+        }
+        return $ipNum;
     }
 
     /**
