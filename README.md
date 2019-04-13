@@ -203,11 +203,11 @@ Here you will find of IPnumber utility methods
 * IpTool::bin2IPv6( IPbin )
     * Return binary string as IPv6 number
       
-* IpTool::getIpv6InterfaceIdentifier( ipNum )
+* IpTool::getIPv6InterfaceIdentifier( ipNum )
     * Return (unicast/anycast) IPv6 number interface identifier
       (last 64 bits as hex)
 
-* IpTool::getIpv6NetworkPrefix( ipNum )
+* IpTool::getIPv6NetworkPrefix( ipNum )
     * Return (unicast/anycast) IPv6 number network prefix
       (first 64 bits as hex)
       

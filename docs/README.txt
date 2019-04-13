@@ -124,10 +124,10 @@ IPv4 utility methods
     IpTool::hasIPv4port( ipNum )
         Return bool true if IP v4 number has trailing port
 
-    IpTool::getPv4port( ipNum )
+    IpTool::getIPv4port( ipNum )
         Return IP v4 port
 
-    IpTool::getPv4withoutPort( ipNum )
+    IpTool::getIPv4withoutPort( ipNum )
         Return IP v4 without port
 
     IpTool::IPv42bin( ipNum )
@@ -190,10 +190,10 @@ IPv6 utility methods
     IpTool::hasIPv6port( ipNum )
         Return bool true if IP v6 number has trailing port
 
-    IpTool::getPv6port( ipNum )
+    IpTool::getIPv6port( ipNum )
         Return IP v6 port
 
-    IpTool::getPv6withoutPort( ipNum )
+    IpTool::getIPv6withoutPort( ipNum )
         Return IP v6 without port
 
     IpTool::isIPv4MappedIPv6( ipNum )
@@ -205,11 +205,11 @@ IPv6 utility methods
     IpTool::bin2IPv6( IPbin )
         Return binary string as IPv6 number
       
-    IpTool::getIpv6InterfaceIdentifier( ipNum )
+    IpTool::getIPv6InterfaceIdentifier( ipNum )
         Return (unicast/anycast) (string) IPv6 number interface identifier
       (last 64 bits as hex)
 
-    IpTool::getIpv6NetworkPrefix( ipNum )
+    IpTool::getIPv6NetworkPrefix( ipNum )
         Return (unicast/anycast) (string) IPv6 number network prefix
       (first 64 bits as hex)
       
@@ -243,7 +243,7 @@ IPv6 utility methods
 Copyright (c) 2019 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
 Link      https://kigkonsult.se
 Package   ipTools
-Version   1.0
+Version   1.1.2
 License   Subject matter of licence is the software ipTools.
           The above copyright, link, package and version notices and
           this licence notice shall be included in all copies or

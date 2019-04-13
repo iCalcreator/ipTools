@@ -17,7 +17,7 @@
  * copyright (c) 2019 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * Link      https://kigkonsult.se
  * Package   ipTools
- * Version   1.1.1
+ * Version   1.1.2
  * License   Subject matter of licence is the software ipTools.
  *           The above copyright, link, package and version notices and
  *           this licence notice shall be included in all copies or
@@ -89,12 +89,12 @@ class IpToolsTest extends TestCase
                     sprintf( $FMTerr, 3, $case, $ipNum )
                 );
                 $this->assertEmpty(
-                    IpTool::getPv4port( $ipNum ),
+                    IpTool::getIPv4port( $ipNum ),
                     sprintf( $FMTerr, 4, $case, $ipNum )
                 );
                 $this->assertEquals(
                     $ipNum,
-                    IpTool::getPv4withoutPort( $ipNum ),
+                    IpTool::getIPv4withoutPort( $ipNum ),
                     sprintf( $FMTerr, 5, $case, $ipNum )
                 );
                 break;
@@ -105,12 +105,12 @@ class IpToolsTest extends TestCase
                 );
                 $this->assertEquals(
                     $port,
-                    IpTool::getPv4port( $ipNum ),
+                    IpTool::getIPv4port( $ipNum ),
                     sprintf( $FMTerr, 7, $case, $ipNum )
                 );
                 $this->assertEquals(
                     explode( ':', $ipNum, 2 )[0],
-                    IpTool::getPv4withoutPort( $ipNum ),
+                    IpTool::getIPv4withoutPort( $ipNum ),
                     sprintf( $FMTerr, 8, $case, $ipNum )
                 );
                 break;
@@ -903,12 +903,12 @@ class IpToolsTest extends TestCase
                     sprintf( $FMTerr, 3, $case, $ipNum )
                 );
                 $this->assertEmpty(
-                    IpTool::getPv6port( $ipNum ),
+                    IpTool::getIPv6port( $ipNum ),
                     sprintf( $FMTerr, 4, $case, $ipNum )
                 );
                 $this->assertEquals(
                     $ipNum,
-                    IpTool::getPv6withoutPort( $ipNum ),
+                    IpTool::getIPv6withoutPort( $ipNum ),
                     sprintf( $FMTerr, 5, $case, $ipNum )
                 );
                 break;
@@ -919,12 +919,12 @@ class IpToolsTest extends TestCase
                 );
                 $this->assertEquals(
                     $port,
-                    IpTool::getPv6port( $ipNum ),
+                    IpTool::getIPv6port( $ipNum ),
                     sprintf( $FMTerr, 7, $case, $ipNum )
                 );
                 $this->assertEquals(
                     substr( explode( ']:', trim( $ipNum, '"' ), 2 )[0], 1 ),
-                    IpTool::getPv6withoutPort( $ipNum ),
+                    IpTool::getIPv6withoutPort( $ipNum ),
                     sprintf( $FMTerr, 8, $case, $ipNum )
                 );
                 break;
@@ -1015,20 +1015,45 @@ class IpToolsTest extends TestCase
     }
     /**
      * @test
+     * @dataProvider iPnum2bin2IPnumTestProvider
      *
      * Test IP number to binary and reverse
-     * Testset #26001-2
+     * Testset #2600x
+     * @param int     $case
+     * @param string $testIp1
      */
-    public function iPnum2bin2IPnumTest() {
-        $testIp1 = '3ffe:f200:0234:ab00:0123:4567:8901:abcd';
+    public function iPnum2bin2IPnumTest( $case, $testIp1 ) {
+        static $FMTerr = 'error %d case #%d for %s';
         $testIp2 = IpTool::expand( IpTool::bin2IPv6( IpTool::IPv62bin( $testIp1 )));
-        $res     = ( $testIp1 == $testIp2 );
-        $this->assertTrue( $res );
+        $res     = ( IpTool::IPv62bin( $testIp1 ) == IpTool::IPv62bin( $testIp2 ));
+        $this->assertTrue(
+            $res,
+            sprintf( $FMTerr, 1, $case, $testIp1 )
+        );
+    }
 
-        $testIp3 = '3ffe::abcd';
-        $testIp4 = IpTool::expand( IpTool::bin2IPv6( IpTool::IPv62bin( $testIp3 )));
-        $res     = ( IpTool::expand( $testIp3 ) == $testIp4 );
-        $this->assertTrue( $res );
+    public function iPnum2bin2IPnumTestProvider() {
+        $dataArr = [];
+
+        $dataArr[] = [
+            26001,
+            '3ffe:f200:0234:ab00:0123:4567:8901:abcd',
+            true,
+        ];
+
+        $dataArr[] = [
+            26002,
+            '3ffe::abcd',
+            true,
+        ];
+
+        $dataArr[] = [
+            26003,
+            '::ffff:192.0.2.128',
+            true,
+        ];
+
+        return $dataArr;
     }
 
     /**
@@ -1189,7 +1214,7 @@ class IpToolsTest extends TestCase
     public function iPv6_getInterfaceIdentifierTest() {
         $testIP  = '3ffe:f200:0234:ab00:0123:4567:8901:1234';
         $interfc = '0123:4567:8901:1234';
-        $res     = IpTool::getIpv6InterfaceIdentifier( $testIP );
+        $res     = IpTool::getIPv6InterfaceIdentifier( $testIP );
         $this->assertEquals( $res, $interfc );
     }
 
@@ -1202,7 +1227,7 @@ class IpToolsTest extends TestCase
     public function iPv6_getNetworkPrefixTest() {
         $testIP  = '3ffe:f200:0234:ab00:0123:4567:8901:1234';
         $interfc = '3ffe:f200:0234:ab00';
-        $res     = IpTool::getIpv6NetworkPrefix( $testIP );
+        $res     = IpTool::getIPv6NetworkPrefix( $testIP );
         $this->assertEquals( $res, $interfc );
     }
 
@@ -1392,11 +1417,88 @@ class IpToolsTest extends TestCase
        ************************************************************************** */
     /**
      * @test
+     * @dataProvider mixedTest1Provider
      *
      * Test mixed IPv4 / IPv6
      * Testset #37001-4
+     *                                 
+     * @param int    $case ,
+     * @param string $ipNum
+     * @param bool   $expected
+     * @param string $port
      */
-    public function mixedTest() {
+    public function mixedTest1( $case, $ipNum, $expected, $port ) {
+        static $FMTerr = 'error %d case #%d for %s';
+        $this->assertTrue(
+            $expected == IpTool::isValidIP( $ipNum ),
+            sprintf( $FMTerr, 1, '37' . $case, $ipNum )
+        );
+
+        switch( true ) {
+            case ( ! $expected ) :
+                break;
+            case ( empty( $port ) ) :
+                $this->assertFalse(
+                    IpTool::hasIPport( $ipNum ),
+                    sprintf( $FMTerr, 3, '37' . $case, $ipNum )
+                );
+                $this->assertEmpty(
+                    IpTool::getIPport( $ipNum ),
+                    sprintf( $FMTerr, 4, '37' . $case, $ipNum )
+                );
+                $this->assertEquals(
+                    $ipNum,
+                    IpTool::getIPwithoutPort( $ipNum ),
+                    sprintf( $FMTerr, 5, '37' . $case, $ipNum )
+                );
+                break;
+            default :
+                $this->assertTrue(
+                    IpTool::hasIPport( $ipNum ),
+                    sprintf( $FMTerr, 6, '37' . $case, $ipNum )
+                );
+                $this->assertEquals(
+                    $port,
+                    IpTool::getIPport( $ipNum ),
+                    sprintf( $FMTerr, 7, '37' . $case, $ipNum )
+                );
+                $ipNum2 =  ( IpTool::isValidIPv4( $ipNum ))
+                    ? explode( ':', $ipNum, 2 )[0]
+                    : substr( explode( ']:', trim( $ipNum, '"' ), 2 )[0], 1 );
+                $this->assertEquals(
+                    $ipNum2,
+                    IpTool::getIPwithoutPort( $ipNum ),
+                    sprintf( $FMTerr, 8, '37' . $case, $ipNum )
+                );
+                break;
+        } // end switch
+
+    }
+
+    /**
+     * Test mixedTest1 provider
+     */
+    public function mixedTest1Provider() {
+        $dataArr = [];
+
+        foreach( $this->isValidIPv4numTestProvider() as $testcase ) {
+            $dataArr[] = $testcase;
+        }
+
+        foreach( $this->isValidIPv6numTestProvider() as $testcase ) {
+            $dataArr[] = $testcase;
+        }
+
+        return $dataArr;
+
+    }
+    /**
+     * @test
+     *
+     * Test mixed IPv4 / IPv6
+     * Testset #37501-4
+     */
+    public function mixedTest2() {
         $rangeArray = [
             '3ffe:f200:0234:ab00:0123:4567:8901:1/64',
             '192.168.42.0/255.255.254.0',

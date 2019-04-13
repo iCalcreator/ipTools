@@ -18,7 +18,7 @@
  * copyright (c) 2019 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * Link      https://kigkonsult.se
  * Package   ipTools
- * Version   1.0
+ * Version   1.1.2
  * License   Subject matter of licence is the software ipTools.
  *           The above copyright, link, package and version notices and
  *           this licence notice shall be included in all copies or
@@ -46,6 +46,7 @@ use InvalidArgumentException;
 
 use function array_slice;
 use function count;
+use function ctype_digit;
 use function decbin;
 use function end;
 use function explode;
@@ -244,7 +245,7 @@ final class IpTool
                         break;
                     case ( IpTool::isValidIPv6( $ipAddress ) && IpTool::isValidIPv6Cidr( $ipNetmaskCidr )) :
                         list( $firstAddr, $lastAddr ) =
-                            IpTool::getIpv6CidrFirstLastBin( $ipAddress, $ipNetmaskCidr, true );
+                            IpTool::getIPv6CidrFirstLastBin( $ipAddress, $ipNetmaskCidr, true );
                         if( ! IpTool::isValidIPv6( $firstAddr ) || ! IpTool::isValidIPv6( $lastAddr )) {
                             throw new InvalidArgumentException( sprintf( $FMTerr, $filterEntry ));
                         }
@@ -302,10 +303,61 @@ final class IpTool
      * @static
      */
     public static function isValidIP( $ipNum ) {
-        if( 0 < substr_count( $ipNum, IpTool::$COLON2 )) {
-            return false;
+        return ( IpTool::isValidIPv4( $ipNum ) || IpTool::isValidIPv6( $ipNum ));
+    }
+
+    /**
+     * Return bool true if IP number has trailing port
+     *
+     * @param string $ipNum
+     * @return bool
+     * @static
+     * @since  1.2.1 - 2019-04-12
+     */
+    public static function hasIPport( $ipNum ) {
+        if( IpTool::isValidIPv4( $ipNum )) {
+            return IpTool::hasIPv4port( $ipNum );
         }
-        return ( IPTool::isValidIPv4( $ipNum ) || IPTool::isValidIPv6( $ipNum ));
+        if( IpTool::isValidIPv6( $ipNum )) {
+            return IpTool::hasIPv6port( $ipNum );
+        }
+        return false;
+    }
+
+    /**
+     * Return IP port
+     *
+     * @param string $ipNum
+     * @return string   port || '' on none found
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     */
+    public static function getIPport( $ipNum ) {
+        if( IpTool::isValidIPv4( $ipNum )) {
+            return IpTool::getIPv4port( $ipNum );
+        }
+        if( IpTool::isValidIPv6( $ipNum )) {
+            return IpTool::getIPv6port( $ipNum );
+        }
+        return IpTool::$SP;
+    }
+
+    /**
+     * Return IP without port
+     *
+     * @param string $ipNum
+     * @return string
+     * @static
+     * @since  1.1.1 - 2019-04-12
+     */
+    public static function getIPwithoutPort( $ipNum ) {
+        if( IpTool::isValidIPv4( $ipNum )) {
+            return IpTool::getIPv4withoutPort( $ipNum );
+        }
+        if( IpTool::isValidIPv6( $ipNum )) {
+            return IpTool::getIPv6withoutPort( $ipNum );
+        }
+        return $ipNum;
     }
 
     /**
@@ -317,11 +369,11 @@ final class IpTool
      * @static
      */
     public static function expand( $ipNum ) {
-        if( IPTool::isValidIPv6( $ipNum )) {
-            return IPTool::expandIPv6( $ipNum );
+        if( IpTool::isValidIPv6( $ipNum )) {
+            return IpTool::expandIPv6( $ipNum );
         }
-        $ipNum = IPTool::expandIPv4( $ipNum );
-        if( IPTool::isValidIPv4( $ipNum )) {
+        $ipNum = IpTool::expandIPv4( $ipNum );
+        if( IpTool::isValidIPv4( $ipNum )) {
             return $ipNum;
         }
         return false;
@@ -340,11 +392,11 @@ final class IpTool
      * @static
      */
     public static function isIpNumInRange( $ipNum, array $acceptRanges, & $matchIx = null ) {
-        if( IPTool::isValidIPv4( $ipNum )) {
-            return IPTool::isIPv4InRange( $ipNum, $acceptRanges, $matchIx );
+        if( IpTool::isValidIPv4( $ipNum )) {
+            return IpTool::isIPv4InRange( $ipNum, $acceptRanges, $matchIx );
         }
-        if( IPTool::isValidIPv6( $ipNum )) {
-            return IPTool::isIPv6InRange( $ipNum, $acceptRanges, $matchIx );
+        if( IpTool::isValidIPv6( $ipNum )) {
+            return IpTool::isIPv6InRange( $ipNum, $acceptRanges, $matchIx );
         }
         $matchIx = null;
         return false;
@@ -381,7 +433,7 @@ final class IpTool
      */
     public static function isValidIPv4( $ipNum ) {
         if( IpTool::hasIPv4port( $ipNum )) {
-            $ipNum = IpTool::getPv4withoutPort( $ipNum );
+            $ipNum = IpTool::getIPv4withoutPort( $ipNum );
         }
         return ( filter_var( $ipNum, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ));
     }
@@ -411,7 +463,7 @@ final class IpTool
     public static function hasIPv4port( $ipNum ) {
         if( IpTool::isIPv4withPort( $ipNum )) {
             $ipNumparts = explode( IpTool::$COLON, $ipNum, 2 );
-            return is_numeric( $ipNumparts[1] );
+            return ctype_digit((string) $ipNumparts[1] );
         }
         return false;
     }
@@ -424,7 +476,7 @@ final class IpTool
      * @static
      * @since  1.1.1 - 2019-04-12
      */
-    public static function getPv4port( $ipNum ) {
+    public static function getIPv4port( $ipNum ) {
         if( IpTool::isIPv4withPort( $ipNum )) {
             return explode( IpTool::$COLON, $ipNum, 2 )[1];
         }
@@ -440,7 +492,7 @@ final class IpTool
      * @since  1.1.1 - 2019-04-12
      * @since  1.1.1 - 2019-04-12
      */
-    public static function getPv4withoutPort( $ipNum ) {
+    public static function getIPv4withoutPort( $ipNum ) {
         if( IpTool::isIPv4withPort( $ipNum )) {
             return explode( IpTool::$COLON, $ipNum, 2 )[0];
         }
@@ -492,7 +544,7 @@ final class IpTool
      * @static
      */
     public static function hasIPv4ValidHost( $ipNum ) {
-        if( ! IPTool::isValidIP( $ipNum )) {
+        if( ! IpTool::isValidIP( $ipNum )) {
             return false;
         }
         $hostName = gethostbyaddr( $ipNum );
@@ -801,9 +853,11 @@ final class IpTool
      * @static
      */
     public static function isValidIPv6( $ipNum ) {
-        echo PHP_EOL; // test ##
         if( IpTool::hasIPv6port( $ipNum )) {
-            $ipNum = IpTool::getPv6withoutPort( $ipNum );
+            $ipNum = IpTool::getIPv6withoutPort( $ipNum );
+        }
+        if( IpTool::isIpv6compressed( $ipNum )) {
+            $ipNum = IpTool::expandIPv6( $ipNum );
         }
         return ( false !== filter_var( $ipNum, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ));
     }
@@ -846,7 +900,7 @@ final class IpTool
      * @static
      * @since  1.1.1 - 2019-04-12
      */
-    public static function getPv6port( $ipNum ) {
+    public static function getIPv6port( $ipNum ) {
         if( IpTool::isIPv6withPort( $ipNum )) {
             $ipNum = trim( $ipNum, self::$DQ );
             return explode( IpTool::$SQC, $ipNum, 2 )[1];
@@ -861,9 +915,8 @@ final class IpTool
      * @return string
      * @static
      * @since  1.1.1 - 2019-04-12
-     * @since  1.1.1 - 2019-04-12
      */
-    public static function getPv6withoutPort( $ipNum ) {
+    public static function getIPv6withoutPort( $ipNum ) {
         if( IpTool::isIPv6withPort( $ipNum )) {
             return substr( explode( IpTool::$SQC, trim( $ipNum, self::$DQ ), 2 )[0], 1 );
         }
@@ -888,7 +941,7 @@ final class IpTool
             return false;
         }
         $ipNum = str_replace( $IPV4PREFIX, null, $ipNum );
-        return IPTool::isValidIPv4( $ipNum );
+        return IpTool::isValidIPv4( $ipNum );
     }
 
     /**
@@ -922,7 +975,7 @@ final class IpTool
      * @return string
      * @static
      */
-    public static function getIpv6InterfaceIdentifier( $ipNum ) {
+    public static function getIPv6InterfaceIdentifier( $ipNum ) {
         return implode(
             IpTool::$COLON,
             array_slice( explode( IpTool::$COLON, IpTool::expand( $ipNum )), 4 )
@@ -936,11 +989,22 @@ final class IpTool
      * @return string
      * @static
      */
-    public static function getIpv6NetworkPrefix( $ipNum ) {
+    public static function getIPv6NetworkPrefix( $ipNum ) {
         return implode(
             IpTool::$COLON,
             array_slice( explode( IpTool::$COLON, IpTool::expand( $ipNum )), 0, 4 )
         );
+    }
+
+    /**
+     * Return bool true if IP v6 numbewr if compressed
+     *
+     * @param string $ipNum
+     * @return string
+     * @static
+     */
+    public static function isIpv6compressed( $ipNum ) {
+        return ( false !== strpos( $ipNum, IpTool::$COLON2 ));
     }
 
     /**
@@ -955,14 +1019,15 @@ final class IpTool
      * @return string
      * @access private
      * @static
+     * @since  1.1.2 - 2019-04-13
      */
     public static function expandIPv6( $ipNum ) {
         static $Hhex  = 'H*hex';
         static $EXPR1 = '/([A-f0-9]{4})/';
         static $EXPR2 = '$1:';
         static $HEX   = 'hex';
-        $hex   = unpack( $Hhex, @inet_pton( $ipNum ));
-        $ipNum = substr( preg_replace( $EXPR1, $EXPR2, $hex[$HEX] ), 0, -1 );
+        $hex    = unpack( $Hhex, @inet_pton( $ipNum ));
+        $ipNum  = substr( preg_replace( $EXPR1, $EXPR2, $hex[$HEX] ), 0, -1 );
         return $ipNum;
     }
 
@@ -1154,7 +1219,7 @@ final class IpTool
      */
     private static function iPv6NetmaskIsCidrSizeBlock( $ipNum, $rangeEntry, $cidr ) {
         $ipNumBin = IpTool::IPv62bin( $ipNum );
-        list( $firstAddrBin, $lastAddrBin ) = IpTool::getIpv6CidrFirstLastBin( $rangeEntry, $cidr );
+        list( $firstAddrBin, $lastAddrBin ) = IpTool::getIPv6CidrFirstLastBin( $rangeEntry, $cidr );
         return (( $firstAddrBin <= $ipNumBin ) && ( $ipNumBin <= $lastAddrBin ));
     }
 
@@ -1183,7 +1248,7 @@ final class IpTool
      * @return array
      * @static
      */
-    public static function getIpv6CidrFirstLastBin( $ipNum, $cidr, $outputAsIpNum = false ) {
+    public static function getIPv6CidrFirstLastBin( $ipNum, $cidr, $outputAsIpNum = false ) {
         // Parse the ipNum into a binary string
         $firstAddrBin  = IpTool::IPv62bin( $ipNum );
         // Convert the binary string to a string with hexadecimal characters
