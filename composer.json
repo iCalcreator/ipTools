@@ -14,7 +14,7 @@
       "netmask"
     ],
     "time" : "2018-04-12",
-    "license": "GPL-3.0-or-later",
+    "license": "LGPL-3.0-or-later",
     "homepage": "http://kigkonsult.se",
     "support": {
        "issues": "https://github.com/iCalcreator/ipTools/issues",
