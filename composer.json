@@ -3,29 +3,35 @@
     "type": "library",
     "description": "ipv4/ipv6 tools",
     "keywords": [
-      "IP",
-      "IPnumber",
-      "IPv4",
-      "IPv6",
-      "range",
-      "verify",
-      "CIDR",
-      "block",
-      "netmask"
+        "IP",
+        "IPnumber",
+        "IPv4",
+        "IPv6",
+        "range",
+        "verify",
+        "CIDR",
+        "block",
+        "netmask"
     ],
     "time" : "2018-04-12",
     "license": "LGPL-3.0-or-later",
     "homepage": "http://kigkonsult.se",
-    "support": {
-       "issues": "https://github.com/iCalcreator/ipTools/issues",
-       "source": "https://github.com/iCalcreator/ipTools"
-    },
     "authors": [
         {
             "name": "Kjell-Inge Gustafsson",
             "email": "ical@kigkonsult.se"
         }
     ],
+    "funding": [
+        {
+            "type": "other",
+            "url": "https://paypal.me/kigkonsult"
+        }
+    ],
+    "support": {
+       "issues": "https://github.com/iCalcreator/ipTools/issues",
+       "source": "https://github.com/iCalcreator/ipTools"
+    },
     "autoload": {
         "files": ["autoload.php"],
         "psr-4": { "Kigkonsult\\IpTools\\": "src/" }
