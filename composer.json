@@ -13,7 +13,7 @@
         "block",
         "netmask"
     ],
-    "time" : "2018-04-12",
+    "time": "2021-06-07",
     "license": "LGPL-3.0-or-later",
     "homepage": "http://kigkonsult.se",
     "authors": [
@@ -29,17 +29,22 @@
         }
     ],
     "support": {
-       "issues": "https://github.com/iCalcreator/ipTools/issues",
-       "source": "https://github.com/iCalcreator/ipTools"
+        "issues": "https://github.com/iCalcreator/ipTools/issues",
+        "source": "https://github.com/iCalcreator/ipTools"
     },
     "autoload": {
-        "files": ["autoload.php"],
-        "psr-4": { "Kigkonsult\\IpTools\\": "src/" }
+        "files": [
+            "autoload.php"
+        ],
+        "psr-4": {
+            "Kigkonsult\\IpTools\\": "src/"
+        }
     },
     "require": {
-        "php": ">=5.6"
+        "php": "^7.0"
     },
     "require-dev": {
-      "phpunit/phpunit": "^6.5.13"
+        "phpstan/phpstan": ">=0.9.3",
+        "phpunit/phpunit": "^6.5.13"
     }
 }

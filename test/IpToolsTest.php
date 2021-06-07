@@ -2,6 +2,8 @@
 /**
  * package ipTools
  *
+ * This file is a part of ipTools
+ *
  * Provides IP v4/v6
  *   validation:
  *     IP in IP/network(cidr) ranges
@@ -14,33 +16,31 @@
  * With courtesy of and inspiration from Paul Gregg <pgregg@pgregg.com>
  * and the excellent functions decbin32 and ip_in_range
  *
- * copyright (c) 2019 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   ipTools
- * Version   1.1.2
- * License   Subject matter of licence is the software ipTools.
- *           The above copyright, link, package and version notices and
- *           this licence notice shall be included in all copies or
- *           substantial portions of the ipTools.
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software ipTools.
+ *            The above copyright, link, package and version notices and
+ *            this licence notice shall be included in all copies or
+ *            substantial portions of the ipTools.
  *
- *           ipTools is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
+ *            ipTools is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as published
+ *            by the Free Software Foundation, either version 3 of the License,
+ *            or (at your option) any later version.
  *
- *           ipTools is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
+ *            ipTools is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
  *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with ipTools. If not, see <https://www.gnu.org/licenses/>.
- *
- * This file is a part of ipTools
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with ipTools. If not, see <https://www.gnu.org/licenses/>.
  */
 
 namespace Kigkonsult\IpTools;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -68,7 +68,13 @@ class IpToolsTest extends TestCase
      * @param string $port
      *
      */
-    public function isValidIPv4numTest( $case, $ipNum, $expected, $port ) {
+    public function isValidIPv4numTest(
+        int $case,
+        string $ipNum,
+        bool $expected,
+        string $port
+    )
+    {
         static $FMTerr = 'error %d case #%d for %s';
         $this->assertTrue(
             $expected == IpTool::isValidIP( $ipNum ),
@@ -121,7 +127,8 @@ class IpToolsTest extends TestCase
     /**
      * Test isValidIPv4numTest provider
      */
-    public function isValidIPv4numTestProvider() {
+    public function isValidIPv4numTestProvider()
+    {
         $dataArr = [];
 
         $dataArr[] = [
@@ -162,7 +169,8 @@ class IpToolsTest extends TestCase
      * (i.e. get the host for an IP number and the host has the same IP number)
      * Testset #2001-2
      */
-    public function hasIPv4ValidHosttest() {
+    public function hasIPv4ValidHosttest()
+    {
         $externalHostName = 'google.com';
         $this->assertTrue(
             IpTool::hasIPv4ValidHost( gethostbyname( $externalHostName ))
@@ -182,32 +190,48 @@ class IpToolsTest extends TestCase
      * Test expand of IP v4 number
      * Testset #3001-3
      *
-     * @param $toExpand
-     * @param $expected
+     * @param int    $case
+     * @param string $toExpand
+     * @param string|bool $expected
      */
-    public function iPv4expandTest( $toExpand, $expected ) {
-        $this->assertEquals( $expected, IpTool::expand( $toExpand ));
+    public function iPv4expandTest( int $case, string $toExpand, $expected )
+    {
+        $this->assertEquals(
+            $expected,
+            IpTool::expand( $toExpand ),
+            "error in case {$case}"
+        );
     }
 
     /**
      * Test iPv4expandTest provider
      */
-    public function iPv4expandTestProvider() {
+    public function iPv4expandTestProvider()
+    {
         $dataArr = [];
 
         $dataArr[] = [
+            11,
             '1.2.3',
             '1.2.3.0',
         ];
 
         $dataArr[] = [
+            22,
             '1.2',
             '1.2.0.0',
         ];
 
         $dataArr[] = [
+            33,
             '1',
             '1.0.0.0',
+        ];
+
+        $dataArr[] = [
+            44,
+            'a',
+            false,
         ];
 
         return $dataArr;
@@ -216,85 +240,55 @@ class IpToolsTest extends TestCase
     /**
      * @test
      *
-     * Test empty range
-     * Testset #4001
+     * Test isIPv4InRange
      */
-    public function emptyIPv4RangeTest() {
+    public function errorIPv4RangeTest()
+    {
+        // Test empty range
         $rangeArray = [];
         $res = IpTool::isIPv4InRange( '192.168.2.1', $rangeArray, $matchIx );
-        $this->assertFalse( $res );
-        $this->assertNull( $matchIx );
-    }
+        $this->assertFalse( $res, 'Error 4001' );
+        $this->assertNull( $matchIx, 'Error 4002'  );
 
-    /**
-     * @test
-     *
-     * Test unvalid range
-     * Testset #4501
-     */
-    public function UnvalidIPv4RangeTest() {
-        $rangeArray = [
-            '$',
-        ];
+        // Test unvalid range
+        $rangeArray = [ '$', ];
         $res = IpTool::isIPv4InRange( '192.168.2.1', $rangeArray, $matchIx );
-        $this->assertFalse( $res );
-        $this->assertNull( $matchIx );
-    }
+        $this->assertFalse( $res, 'Error 4101' );
+        $this->assertNull( $matchIx, 'Error 4102' );
 
-    /**
-     * @test
-     *
-     * Test accept all IPs
-     * Testset #5001
-     */
-    public function iPv4_allTest() {
-        $rangeArray = [
-            '*',
-        ];
+        // Test accept all IPs
+        $rangeArray = [ '*' ];
         $res = IpTool::isIPv4InRange( '192.168.3.1', $rangeArray, $matchIx );
-        $this->assertTrue( $res );
-    }
+        $this->assertTrue( $res, 'Error 4201' );
 
-    /**
-     * @test
-     *
-     * Test unvalid range
-     * Testset #6001
-     */
-    public function unvalidIPv4Range1Test() {
-        $rangeArray = [
-            '192,168,4,1',
-        ];
+        $rangeArray = [ '192.168.3.*' ];
+        $res = IpTool::isIPv4InRange( '192.168.3.1', $rangeArray, $matchIx );
+        $this->assertTrue( $res, 'Error 4301' );
+
+        // Test unvalid range
+        $rangeArray = [ '192,168,4,1', ];
         $res = IpTool::isIPv4InRange( '192.168.4.1', $rangeArray, $matchIx );
-        $this->assertFalse( $res );
-        $this->assertNull( $matchIx );
-    }
+        $this->assertFalse( $res, 'Error 4401' );
+        $this->assertNull( $matchIx, 'Error 4402' );
 
-    /**
-     * @test
-     *
-     * Test unvalid range 2
-     * Testset #7001
-     */
-    public function unvalidIPv4Range2Test() {
-        $range = [ '192,168,31,2' ];
-        $res   = IpTool::isIPv4InRange( '192.168.31.2', $range );
-        $this->assertFalse( $res );
-    }
+        // Test unvalid range 2
+        $rangeArray = [ '192.168.31.1/54' ];
+        $res   = IpTool::isIPv4InRange( '192.168.31.2', $rangeArray );
+        $this->assertFalse( $res, 'Error 4501' );
 
-    /**
-     * @test
-     *
-     * Test unvalid range
-     * Testset #8001
-     */
-    public function unvalidIPv4Range3Test() {
-        $rangeArray = [
-            'no Match here',
-        ];
+        $rangeArray = [ '192.168.31.4-192.168.31.2' ];
+        $res   = IpTool::isIPv4InRange( '192.168.31.1', $rangeArray );
+        $this->assertFalse( $res, 'Error 4502' );
+
+        $rangeArray = [ '192.168.31.1-192.168.987' ];
+        $res   = IpTool::isIPv4InRange( '192.168.31.2', $rangeArray );
+        $this->assertFalse( $res, 'Error 4503' );
+
+        // Test unvalid range
+        $rangeArray = [ 'no Match here', ];
         $res = IpTool::isIPv4InRange( '192.168.0.1', $rangeArray, $matchIx );
-        $this->assertFalse( $res );
-        $this->assertNull( $matchIx );
+        $this->assertFalse( $res, 'Error 4601' );
+        $this->assertNull( $matchIx, 'Error 4602' );
     }
 
     /**
@@ -303,7 +297,8 @@ class IpToolsTest extends TestCase
      * Test Wildcard format: 1.2.3.*
      * Testset #9001-2
      */
-    public function isIPv4numInRange_wildcardTest() {
+    public function isIPv4numInRange_wildcardTest()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.31.*',
@@ -326,7 +321,7 @@ class IpToolsTest extends TestCase
      * Testset #10001-7
      * @param int    $case
      * @param string $ipToTest,
-     * @param string $ipNetmask,
+     * @param null|string $ipNetmask,
      * @param string $ipNet,
      * @param string $ipFirst,
      * @param string $ipLast,
@@ -334,14 +329,14 @@ class IpToolsTest extends TestCase
      * @param bool   $expects
      */
     public function IPv4BreakoutTest(
-        $case,
-        $ipToTest,
+        int $case,
+        string $ipToTest,
         $ipNetmask,
-        $ipNet,
-        $ipFirst,
-        $ipLast,
-        $ipBroadcast,
-        $expects
+        string $ipNet,
+        string $ipFirst,
+        string $ipLast,
+        string $ipBroadcast,
+        bool $expects
     ) {
         static $FMTerr = "error %d, in case #%d, ip:%s, netmask:%s -> %s, %s, %s, %s";
 
@@ -380,12 +375,13 @@ class IpToolsTest extends TestCase
     /**
      * Test IPv4Breakout provider
      */
-    public function IPv4BreakoutTestProvider() {
+    public function IPv4BreakoutTestProvider()
+    {
         $dataArr = [];
 
         $dataArr[] = [
             10001,
-            null,
+            '987.987.987',
             null,
             '192.168.0.0',
             '192.168.0.1',
@@ -469,7 +465,8 @@ class IpToolsTest extends TestCase
      * Test unvalid cidr format: 1.2.3.4/C (unvalid)
      * Testset #11001
      */
-    public function iPv4_CIDR_unvalidTest() {
+    public function iPv4_CIDR_unvalidTest()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.40.40/C',
@@ -485,7 +482,8 @@ class IpToolsTest extends TestCase
      * Test all IPv4 cidr netmask formats
      * Testset #12001-x
      */
-    public function iPv4_CIDR_NetmaskTest() {
+    public function iPv4_CIDR_NetmaskTest()
+    {
         $FMTIP   = '192.168.%d.1';
         $FMTcidr = '%s/%s';
         $FMTerr  = 'Testing error (case #%s) with ip: %s with netmask %s';
@@ -512,7 +510,8 @@ class IpToolsTest extends TestCase
      * Test all IPv4 cidr block formats
      * Testset #13001-x
      */
-    public function iPv4_CIDRblockTest() {
+    public function iPv4_CIDRblockTest()
+    {
         $FMTIP   = '192.168.%d.1';
         $FMTcidr = '%s/%d';
         $FMTerr  = 'Testing error (case #%s) with ip: %s with netmask %s';
@@ -546,7 +545,8 @@ class IpToolsTest extends TestCase
      * Test cidr format: 1.2.3/22
      * Testset #14001-4
      */
-    public function iPv4_CIDR_block22Test() {
+    public function iPv4_CIDR_block22Test()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.41/22',
@@ -575,7 +575,8 @@ class IpToolsTest extends TestCase
      * Test cidr format: 1.2.3.4/255.255.252.0
      * Testset #15001-4
      */
-    public function iPv4_CIDR_netmask22Test() {
+    public function iPv4_CIDR_netmask22Test()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.41.0/255.255.252.0',
@@ -603,7 +604,8 @@ class IpToolsTest extends TestCase
      * Test cidr format: 1.2.3/23, boundary test
      * Testset #16001-4
      */
-    public function iPv4_CIDR_block23Test() {
+    public function iPv4_CIDR_block23Test()
+    {
         $rangeArray = [
             '192.168.10.1',
             '192.168.12.1',
@@ -639,7 +641,8 @@ class IpToolsTest extends TestCase
      * Test cidr format: 1.2.3.4/255.255.254.0, boundary test
      * Testset #17001-4
      */
-    public function iPv4_CIDR_netmask23Test() {
+    public function iPv4_CIDR_netmask23Test()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.42.0/255.255.254.0',
@@ -667,7 +670,8 @@ class IpToolsTest extends TestCase
      * Accept cidr format: 1.2.3/24, boundary test
      * Testset #18001-4
      */
-    public function iPv4_CIDR_block24Test() {
+    public function iPv4_CIDR_block24Test()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.43/24',
@@ -696,7 +700,8 @@ class IpToolsTest extends TestCase
      * Test cidr format: 1.2.3.4/255.255.255.0, boundary test
      * Testset #19001-4
      */
-    public function iPv4_CIDR_netmask24Test() {
+    public function iPv4_CIDR_netmask24Test()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.43.0/255.255.255.0',
@@ -725,7 +730,8 @@ class IpToolsTest extends TestCase
      * Accept cidr format: 1.2.3/25, boundary test
      * Testset #20001-4
      */
-    public function iPv4_CIDR_block25Test() {
+    public function iPv4_CIDR_block25Test()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.0.2',
@@ -756,7 +762,8 @@ class IpToolsTest extends TestCase
      * Test cidr format: 1.2.3.4/255.255.255.128, boundary test
      * Testset #21001-4
      */
-    public function iPv4_CIDR_netmask25Test() {
+    public function iPv4_CIDR_netmask25Test()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.0.2',
@@ -786,7 +793,8 @@ class IpToolsTest extends TestCase
      * Test start-end IP format: 1.2.3.0-1.2.3.255, boundary test
      * Testset #22001-4
      */
-    public function iPv4_Start_End_IP_formatTest() {
+    public function iPv4_Start_End_IP_formatTest()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.0.2',
@@ -812,10 +820,11 @@ class IpToolsTest extends TestCase
     /**
      * @test
      *
-     * Test specific IP: 1.2.3.4
+     * Test specific IP: 1.2.3.4  isIPv4InRange
      * Testset #23001-5
      */
-    public function specific_IPv4Test() {
+    public function specific_IPv4Test()
+    {
         $rangeArray = [
             '192.168.0.1',
             '192.168.62.2',
@@ -848,7 +857,8 @@ class IpToolsTest extends TestCase
      * Test decbin32
      * Testset #24001-x
      */
-    public function decbin32Test() {
+    public function decbin32Test()
+    {
         foreach( [ gethostbyname( gethostname()), '1.1.1.1' ] as $IPnum ) {
             $IPlong  = ip2long( $IPnum );
             $IPbin   = decbin( $IPlong );
@@ -865,13 +875,21 @@ class IpToolsTest extends TestCase
      * Test getNetworkFromIpv4Cidr (and IPv4Breakout)
      * Testset #24501-x
      */
-    public function getNetworkFromIpv4CidrTest() {
+    public function getNetworkFromIpv4CidrTest()
+    {
         $testIP = '192.168.0.1';
         foreach( IpTool::$v4CidrBlock2netmask as $cidr => $netmask ) {
             $network1 = IpTool::getNetworkFromIpv4Cidr( $testIP, $cidr );
-            list( $network2, $dummy2, $dummy3, $dummy4 ) = IpTool::IPv4Breakout( $testIP, $cidr );
-            $this->assertTrue( $network1 == IpTool::bin2IPv4( $network2 ));
-        }
+            list( $network2bin, $dummy2, $dummy3, $dummy4 ) = IpTool::IPv4Breakout( $testIP, $cidr );
+            $network2 = IpTool::bin2IPv4( $network2bin );
+            $network2 = IpTool::bin2IPv4( $network2bin );
+            $this->assertEquals(
+                $network1,
+                $network2,
+                'Error IP:' . $testIP . ' cidr:' . $cidr . ' netmask:' . $netmask .
+                ' network1: ' . $network1 . ' network2: ' . $network2bin
+            );
+        } // end foreach
     }
 
     /* **************************************************************************
@@ -885,13 +903,19 @@ class IpToolsTest extends TestCase
      * Testset #2500x
      * @param int    $case
      * @param string $ipNum
-     * @param string $expected
+     * @param bool $expected
      * @param string $port
      */
-    public function isValidIPv6numTest( $case, $ipNum, $expected, $port ) {
+    public function isValidIPv6numTest(
+        int $case,
+        string $ipNum,
+        bool $expected,
+        string $port
+    )
+    {
         static $FMTerr = 'error %d case #%d for %s';
         $this->assertTrue(
-            $expected == IpTool::isValidIPv6( $ipNum ),
+            $expected === IpTool::isValidIPv6( $ipNum ),
             sprintf( $FMTerr, 1, $case, $ipNum )
         );
         switch( true ) {
@@ -931,7 +955,8 @@ class IpToolsTest extends TestCase
         } // end switch
     }
 
-    public function isValidIPv6numTestProvider() {
+    public function isValidIPv6numTestProvider()
+    {
         $dataArr = [];
 
         $dataArr[] = [
@@ -1022,7 +1047,8 @@ class IpToolsTest extends TestCase
      * @param int     $case
      * @param string $testIp1
      */
-    public function iPnum2bin2IPnumTest( $case, $testIp1 ) {
+    public function iPnum2bin2IPnumTest( int $case, string $testIp1 )
+    {
         static $FMTerr = 'error %d case #%d for %s';
         $testIp2 = IpTool::expand( IpTool::bin2IPv6( IpTool::IPv62bin( $testIp1 )));
         $res     = ( IpTool::IPv62bin( $testIp1 ) == IpTool::IPv62bin( $testIp2 ));
@@ -1032,7 +1058,8 @@ class IpToolsTest extends TestCase
         );
     }
 
-    public function iPnum2bin2IPnumTestProvider() {
+    public function iPnum2bin2IPnumTestProvider()
+    {
         $dataArr = [];
 
         $dataArr[] = [
@@ -1071,7 +1098,8 @@ class IpToolsTest extends TestCase
      * @param int    $case
      * @param string $condensedIP
      */
-    public function iPv6_expandTest( $case, $condensedIP ) {
+    public function iPv6_expandTest( int $case, string $condensedIP )
+    {
         $exandedIp = IpTool::expand( $condensedIP );
         $this->assertTrue( IpTool::isValidIPv6( $exandedIp ), "error case #{$case}" );
         $this->assertEquals(
@@ -1081,7 +1109,8 @@ class IpToolsTest extends TestCase
         );
     }
 
-    public function iPv6_expandTestProvider() {
+    public function iPv6_expandTestProvider()
+    {
         return [
             [ 27001, '1:2:3:4:5:6::8' ],
             [ 27002, '1:2:3:4:5::8' ],
@@ -1118,7 +1147,8 @@ class IpToolsTest extends TestCase
      * Test NO compress IP
      * Testset #28001
      */
-    public function iPv6_compress2Test() {
+    public function iPv6_compress2Test()
+    {
         $IPtoCompress = '1:2::5:6:7:8';
         $this->assertEquals( IpTool::compressIPv6( $IPtoCompress ), $IPtoCompress );
     }
@@ -1131,33 +1161,52 @@ class IpToolsTest extends TestCase
      * Testset #28001-64
      * @param int    $case
      * @param string $IPtoCompress
-     * @param string P$compareIP
+     * @param string $compareIP
      */
-    public function iPv6_compressTest( $case, $IPtoCompress, $compareIP ) {
+    public function iPv6_compressTest( int $case, string $IPtoCompress, string $compareIP )
+    {
+
+//      echo PHP_EOL . __FUNCTION__ . ' start case #' . $case . ' IPtoCompress: ' . $IPtoCompress . PHP_EOL; // test ###
         $isFull      = ( 7 == substr_count( $IPtoCompress, ':' ));
         $arg2        = ( $isFull ) ? null : false;
+        /*
         $condensedIP = IpTool::compressIPv6( $IPtoCompress, $arg2 );
+        // also test this??
+        */
+        if( $isFull ) {
+            $condensedIP = IpTool::compressIPv6( $IPtoCompress );
+        }
+        else {
+            $condensedIP = IpTool::compressIPv6( $IPtoCompress, false );
+        }
         if( ! $isFull )
-            $this->assertEquals( $compareIP, $condensedIP, "error 1 in case #{$case}" );
+            $this->assertEquals(
+                $compareIP,
+                $condensedIP,
+                'error 1 in case #' . $case .
+                ' IPtoCompress: ' . $IPtoCompress . ', i8Bit: ' . var_export( $arg2, true ) .
+                ', exp: ' . $compareIP
+            );
         else {
             $this->assertTrue(
                 IpTool::isValidIPv6( $condensedIP ),
-                "error 2 in case #{$case}"
+                "error 21 in case #{$case}, {$condensedIP} not valid ipV6"
             );
             $this->assertEquals(
                 IpTool::IPv62bin( $IPtoCompress ),
                 IpTool::IPv62bin( $condensedIP ),
-                "error 2 in case #{$case}"
+                "error 22 in case #{$case} {$IPtoCompress} <-> {$condensedIP}"
             );
             $this->assertEquals(
                 IpTool::IPv62bin( $compareIP ),
                 IpTool::IPv62bin( $condensedIP ),
-                "error 2 in case #{$case}"
+                "error 23 in case #{$case} {$compareIP} <-> {$condensedIP}"
             );
         }
     }
 
-    public function iPv6_compressTestProvider() {
+    public function iPv6_compressTestProvider()
+    {
         return [
             [ 28001, '0001:0002:0003:0004:0005:0006:0007:0008', '1:2:3:4:5:6:7:8' ],
             [ 28002, '0001:0002:0003:0004:0005:0006:0007:0000', '1:2:3:4:5:6:7::' ],
@@ -1196,13 +1245,65 @@ class IpToolsTest extends TestCase
 
             [ 28051, '0001:0000:0000:0000:0000:0000:0000:0008', '1::8' ],
             [ 28052, '0000:0002:0000:0000:0000:0000:0007:0000', '0:2::7:0' ],
-            [ 28053, '0000:0000:0000:0004:0005:0000:0000:0000', '0:0:0:4:5:0:0:0' ],
+            [ 28053, '0000:0000:0000:0004:0005:0000:0000:0000', '::4:5:0:0:0' ],
+            [ 28054, '0001:0000:0000:0000:0005:0000:0000:0000', '1::5:0:0:0' ],
+            [ 28055, '0000:0000:0000:0004:0000:0000:0000:0008', '::4:0:0:0:8' ],
 
-            [ 28061, '0000:0000:0003:0004:0005:0006', '::3:4:5:6' ],
-            [ 28062, '0001:0000:0000:0004:0000:0006', '1::4:0:6' ],
-            [ 28063, '0001:0000:0003:0000:0000:0006', '1:0:3::6' ],
-            [ 28064, '0001:0002:0003:0004:0000:0000', '1:2:3:4::' ],
+            [ 28060, '0001:0002:0003:0004:0005:0006', '1:2:3:4:5:6' ],
+
+            [ 28061, '0001:0002:0003:0004:0005:0000', '1:2:3:4:5:0' ],
+            [ 28062, '0001:0002:0003:0004:0000:0000', '1:2:3:4:0:0' ],
+            [ 28063, '0001:0002:0003:0000:0000:0000', '1:2:3:0:0:0' ],
+            [ 28064, '0001:0002:0000:0000:0000:0000', '1:2:0:0:0:0' ],
+            [ 28065, '0001:0000:0000:0000:0000:0000', '1:0:0:0:0:0' ],
+
+            [ 28066, '0000:0002:0003:0004:0005:0006', '0:2:3:4:5:6' ],
+            [ 28067, '0000:0000:0003:0004:0005:0006', '0:0:3:4:5:6' ],
+            [ 28068, '0000:0000:0000:0004:0005:0006', '0:0:0:4:5:6' ],
+            [ 28068, '0000:0000:0000:0000:0005:0006', '0:0:0:0:5:6' ],
+            [ 28069, '0000:0000:0000:0000:0000:0006', '0:0:0:0:0:6' ],
+
+            [ 28082, '0001:0000:0000:0004:0000:0006', '1:0:0:4:0:6' ],
+            [ 28083, '0001:0000:0003:0000:0000:0006', '1:0:3:0:0:6' ],
+            [ 28084, '0001:0002:0003:0004:0005:0000', '1:2:3:4:5:0' ],
+            [ 28085, '0001:0002:0003:0004:0000:0000', '1:2:3:4:0:0' ],
         ];
+    }
+
+    /**
+     * Test negative result
+     *
+     * @test
+     */
+    public function iPv6_compressTest2()
+    {
+        $ipNum = '::4:0:0:0:8';
+        $this->assertEquals(
+            IpTool::compressIPv6( $ipNum ),
+            $ipNum,
+            "error 1 : $ipNum <-> $ipNum"
+        );
+        $this->assertFalse(
+            IpTool::compressIPv6(
+                'no_valid_ip',
+                null),
+            "error 2 : 'no_valid_ip', null"
+        );
+        $this->assertFalse(
+            IpTool::compressIPv6(
+                'no:valid:ip',
+                null),
+            "error 3 : 'no:valid:ip', null"
+        );
+        $this->assertEquals(
+            '1::8',
+            IpTool::compressIPv6(
+                '0001:0000:0000:0000:0000:0000:0000:0008',
+                null),
+            "error 4 : '1::8' <-> '0001:0000:0000:0000:0000:0000:0000:0008'"
+        );
+//        '0001:0000:0000:0000:0000:0000:0000:0008', '1::8' ],
+
     }
 
     /**
@@ -1211,7 +1312,8 @@ class IpToolsTest extends TestCase
      * Test getInterfaceIdentifier
      * Testset #29001
      */
-    public function iPv6_getInterfaceIdentifierTest() {
+    public function iPv6_getInterfaceIdentifierTest()
+    {
         $testIP  = '3ffe:f200:0234:ab00:0123:4567:8901:1234';
         $interfc = '0123:4567:8901:1234';
         $res     = IpTool::getIPv6InterfaceIdentifier( $testIP );
@@ -1224,7 +1326,8 @@ class IpToolsTest extends TestCase
      * Test getNetworkPrefix
      * Testset #30001
      */
-    public function iPv6_getNetworkPrefixTest() {
+    public function iPv6_getNetworkPrefixTest()
+    {
         $testIP  = '3ffe:f200:0234:ab00:0123:4567:8901:1234';
         $interfc = '3ffe:f200:0234:ab00';
         $res     = IpTool::getIPv6NetworkPrefix( $testIP );
@@ -1237,7 +1340,8 @@ class IpToolsTest extends TestCase
      * Test accept all IPs
      * Testset #31001
      */
-    public function iPv6_allTest() {
+    public function iPv6_allTest()
+    {
         $rangeArray = [
             '*',
         ];
@@ -1253,9 +1357,9 @@ class IpToolsTest extends TestCase
      * Test empty range
      * Testset #32001
      */
-    public function emptyIPv6RangeTest() {
-        $rangeArray = [];
-        $res = IpTool::isIPv6InRange( '3ffe:f200:0234:ab00:0123:4567:1:20', $rangeArray, $matchIx );
+    public function emptyIPv6RangeTest()
+    {
+        $res = IpTool::isIPv6InRange( '3ffe:f200:0234:ab00:0123:4567:1:20', [], $matchIx );
         $this->assertFalse( $res );
         $this->assertNull( $matchIx );
     }
@@ -1266,13 +1370,30 @@ class IpToolsTest extends TestCase
      * Test unvalid range
      * Testset #32501
      */
-    public function unvalidIPv6RangeTest() {
-        $rangeArray = [
-            'no Match here',
-        ];
-        $res = IpTool::isIPv6InRange( '3ffe:f200:0234:ab00:0123:4567:1:20', $rangeArray, $matchIx );
+    public function unvalidIPv6RangeTest()
+    {
+        $ipNum = '3ffe:f200:0234:ab00:0123:4567:1:20';
+        $res = IpTool::isIPv6InRange(
+            $ipNum,
+            [ 'no Match here', ],
+            $matchIx
+        );
         $this->assertFalse( $res );
         $this->assertNull( $matchIx );
+
+        $res = IpTool::isIPv6InRange(
+            $ipNum,
+            [ 'errLow-errHigh' ],
+            $matchIx
+        );
+        $this->assertFalse( $res );
+
+        $res = IpTool::isIPv6InRange(
+            $ipNum,
+            [ '3ffe:f200:0234:ab00:0123:4567:1:20-errHigh' ],
+            $matchIx
+        );
+        $this->assertFalse( $res );
     }
 
     /**
@@ -1281,7 +1402,8 @@ class IpToolsTest extends TestCase
      * Test unvalid range
      * Testset #33001-2
      */
-    public function unvalidCidrTest() {
+    public function unvalidCidrTest()
+    {
         $rangeArray = [
             '3ffe:f200:0234:ab00:0123:4567:1:20/210',
         ];
@@ -1302,7 +1424,8 @@ class IpToolsTest extends TestCase
      * Test all cidr block formats
      * Testset #34001-x
      */
-    public function iCidrblockTest() {
+    public function iCidrblockTest()
+    {
         $FMTcidr   = '%s/%d';
         $FMTIP     = '1::';
         $FMTerr    = 'Testing error (case #%s) with ip: %s, range: %s';
@@ -1328,7 +1451,8 @@ class IpToolsTest extends TestCase
      * Test no match in cidr block
      * Testset #35001
      */
-    public function iPv6_CIDR_noMatchTest() {
+    public function iPv6_CIDR_noMatchTest()
+    {
         $testIP     = 'fe80:1:2:3:a:bad:1dea::10';
         $rangeArray = [
             '3ffe:f200:0234:ab00:0123:4567:8901:1/64',
@@ -1345,7 +1469,8 @@ class IpToolsTest extends TestCase
      * Test IP num in range ex. 1:2:3:4::-1:2:3:5::, boundary test
      * Testset #36001-7
      */
-    public function iPv6_Start_End_IP_formatTest() {
+    public function iPv6_Start_End_IP_formatTest()
+    {
         $rangeArray = [
             '3ffe:f200:0234:ab00:0123:4567:1:2',
             '3ffe:f200:0234:ab00:0123:4567:1:10-3ffe:f200:0234:ab00:0123:4567:1:19',
@@ -1386,7 +1511,8 @@ class IpToolsTest extends TestCase
      * Test specific IPv6
      * Testset #36001-5
      */
-    public function specific_IPv6Test() {
+    public function specific_IPv6Test()
+    {
         $rangeArray = [
             '1:2:3:80::1:0',
             '1:2:3:80::3:0',
@@ -1421,13 +1547,14 @@ class IpToolsTest extends TestCase
      *
      * Test mixed IPv4 / IPv6
      * Testset #37001-4
-     *                                 
+     *
      * @param int    $case ,
      * @param string $ipNum
      * @param bool   $expected
      * @param string $port
      */
-    public function mixedTest1( $case, $ipNum, $expected, $port ) {
+    public function mixedTest1( int $case, string $ipNum, bool $expected, string $port )
+    {
         static $FMTerr = 'error %d case #%d for %s';
         $this->assertTrue(
             $expected == IpTool::isValidIP( $ipNum ),
@@ -1478,7 +1605,8 @@ class IpToolsTest extends TestCase
     /**
      * Test mixedTest1 provider
      */
-    public function mixedTest1Provider() {
+    public function mixedTest1Provider()
+    {
         $dataArr = [];
 
         foreach( $this->isValidIPv4numTestProvider() as $testcase ) {
@@ -1490,15 +1618,16 @@ class IpToolsTest extends TestCase
         }
 
         return $dataArr;
-
     }
+
     /**
      * @test
      *
      * Test mixed IPv4 / IPv6
      * Testset #37501-4
      */
-    public function mixedTest2() {
+    public function mixedTest2()
+    {
         $rangeArray = [
             '3ffe:f200:0234:ab00:0123:4567:8901:1/64',
             '192.168.42.0/255.255.254.0',
@@ -1527,6 +1656,31 @@ class IpToolsTest extends TestCase
 
     /**
      * @test
+     */
+    public function postNegTests()
+    {
+        $strangeIp = 'stringIp';
+        $this->assertFalse(
+            IpTool::hasIPport( $strangeIp ),
+            "case 1 {$strangeIp} has no port"
+        );
+        $this->assertEmpty(
+            IpTool::getIPport( $strangeIp ),
+            "case 2 {$strangeIp} has no port"
+        );
+        $this->assertEquals(
+            $strangeIp,
+            IpTool::getIPwithoutPort( $strangeIp ),
+            "case 3 {$strangeIp} has no port"
+        );
+        $this->assertFalse(
+            IpTool::expand( $strangeIp ),
+            "case 4 {$strangeIp} can't expand..."
+        );
+    }
+
+    /**
+     * @test
      * @dataProvider iPv4MappedV6TestProvider
      *
      * Test IPv4 mapped to IPv6
@@ -1536,7 +1690,8 @@ class IpToolsTest extends TestCase
      * @param bool   $expected
      *
      */
-    public function iPv4MappedV6Test( $case, $ipNum, $expected) {
+    public function iPv4MappedV6Test( int $case, string $ipNum, bool $expected )
+    {
         static $FMTerr = 'error %d for #%d : \'%s\'';
 
         $this->assertTrue(
@@ -1545,7 +1700,8 @@ class IpToolsTest extends TestCase
         );
     }
 
-    public function iPv4MappedV6TestProvider() {
+    public function iPv4MappedV6TestProvider()
+    {
         $dataArr = [];
 
         $dataArr[] = [
@@ -1601,7 +1757,8 @@ class IpToolsTest extends TestCase
      * Test IPv4 mapped to (compressed) IPv6
      * Testset #39001
      */
-    public function iPv4MappedV6_expandTest() {
+    public function iPv4MappedV6_expandTest()
+    {
         $testIP    = '::ffff:192.0.2.128';
         $exandedIp = IpTool::expand( $testIP );
         $this->assertTrue( IpTool::isValidIPv6( $exandedIp ));
@@ -1619,15 +1776,17 @@ class IpToolsTest extends TestCase
      *
      * @param int    $case
      * @param array  $baseFilterArr,
-     * @param string $addFilterEntry,
+     * @param string|array $addFilterEntry,
      * @param string $IpNumToTest
      */
     public function classfactoryTest(
-        $case,
+        int $case,
         $baseFilterArr,
         $addFilterEntry,
-        $IpNumToTest
-    ) {
+        string $IpNumToTest
+    )
+    {
+        $matchIx = null;
         $this->assertTrue(
             Iptool::factory( $baseFilterArr )
                   ->addFilter( $addFilterEntry )
@@ -1644,18 +1803,20 @@ class IpToolsTest extends TestCase
      * Test IpTool class instance
      * Testset #40001-x
      *
-     * @param int    $case
-     * @param array  $baseFilterArr,
-     * @param string $addFilterEntry,
-     * @param string $IpNumToTest
+     * @param int          $case
+     * @param null|array   $baseFilterArr,
+     * @param string|array $addFilterEntry,
+     * @param string       $IpNumToTest
      */
     public function classInstanceTest(
-        $case,
+        int $case,
         $baseFilterArr,
         $addFilterEntry,
-        $IpNumToTest
-    ) {
+        string $IpNumToTest
+    )
+    {
         $ipValidator = new Iptool( $baseFilterArr );
+        $matchIx     = null;
         $this->assertTrue(
             $ipValidator->addFilter( $addFilterEntry )
                   ->checkIPnumInRange( $IpNumToTest, $matchIx ),
@@ -1668,7 +1829,8 @@ class IpToolsTest extends TestCase
         );
     }
 
-    public function classTestsProvider() {
+    public function classTestsProvider()
+    {
         $dataArr = [];
 
         $dataArr[] = [
@@ -1721,4 +1883,37 @@ class IpToolsTest extends TestCase
         return $dataArr;
     }
 
+    /**
+     * @test
+     *
+     * Test unvalid filters
+     */
+    public function addFilterTest()
+    {
+        $errFound = false;
+        try {
+            $res = Iptool::factory()
+                  ->addFilter( '987.987.987.*' );
+        }
+        catch( Exception $e ) {
+            $errFound = true;
+        }
+        $this->assertTrue(
+            $errFound,
+            'err 1 on 987.987.987.*'
+        );
+
+        $errFound = false;
+        try {
+            $res = Iptool::factory()
+                         ->addFilter( '987.987.0.0/24' );
+        }
+        catch( Exception $e ) {
+            $errFound = true;
+        }
+        $this->assertTrue(
+            $errFound,
+            'err 1 on 987.987.0.0/24'
+        );
+    }
 }

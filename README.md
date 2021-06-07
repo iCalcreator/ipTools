@@ -32,8 +32,15 @@ to your PHP-script
 Namespace is Kigkonsult\IpTools.
 
 
+#### Sponsorship
+Donation using [paypal.me/kigkonsult] are appreciated.
+For invoice, please [e-mail]</a>.
+
+
 ###### USAGE 
  
+IpTools 2.0 require PHP7+
+
 How to check an IPv4/v6 number is valid and in a validity range :
 
 **1** Build a validity range filter
@@ -241,3 +248,5 @@ This project is licensed under the LGPLv3 License
 
 
 [Composer]:https://getcomposer.org/
+[e-mail]:mailto:ical@kigkonsult.se
+[paypal.me/kigkonsult]:https://paypal.me/kigkonsult

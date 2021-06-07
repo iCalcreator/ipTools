@@ -2,9 +2,11 @@
 /**
  * package ipTools
  *
+ * This file is a part of ipTools
+ *
  * Provides IP v4/v6
  *   validation:
- *     IP in IP/network(CIDR) ranges
+ *     IP in IP/network(cidr) ranges
  *   and util services:
  *     is valid IP,
  *     expand/compress IP number
@@ -14,10 +16,9 @@
  * With courtesy of and inspiration from Paul Gregg <pgregg@pgregg.com>
  * and the excellent functions decbin32 and ip_in_range
  *
- * copyright (c) 2019 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * copyright (c) 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * Link      https://kigkonsult.se
  * Package   ipTools
- * Version   1.1.2
  * License   Subject matter of licence is the software ipTools.
  *           The above copyright, link, package and version notices and
  *           this licence notice shall be included in all copies or
@@ -35,8 +36,6 @@
  *
  *           You should have received a copy of the GNU Lesser General Public License
  *           along with ipTools. If not, see <https://www.gnu.org/licenses/>.
- *
- * This file is a part of ipTools
  */
 
 spl_autoload_register(

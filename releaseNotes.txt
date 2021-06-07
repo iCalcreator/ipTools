@@ -1,0 +1,4 @@
+
+1.2
+  PHP 7+
+  IpTool::compressIPv6() bug
