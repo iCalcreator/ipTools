@@ -79,29 +79,29 @@ final class IpTool
     /**
      * @var string[]
      */
-    private $filter = [];
+    private array $filter = [];
 
     /**
      * internal vars
      *
      */
-    private static $AST    = '*';
-    private static $COLON  = ':';
-    private static $COLON2 = '::';
-    private static $DASH   = '-';
-    private static $DOT    = '.';
-    private static $DQ     = '"';
-    private static $SLASH  = '/';
-    private static $SQC    = ']:';
-    private static $SP0    = '';
-    private static $ZERO   = '0';
+    private static string $AST    = '*';
+    private static string $COLON  = ':';
+    private static string $COLON2 = '::';
+    private static string $DASH   = '-';
+    private static string $DOT    = '.';
+    private static string $DQ     = '"';
+    private static string $SLASH  = '/';
+    private static string $SQC    = ']:';
+    private static string $SP0    = '';
+    private static string $ZERO   = '0';
 
     /**
      * cidr IP v4 block netmask chart
      *
      * @linc https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#IPv4_CIDR_blocks
      */
-    public static $v4CidrBlock2netmask = [
+    public static array $v4CidrBlock2netmask = [
         0  => '0.0.0.0',
         1  => '128.0.0.0',
         2  => '192.0.0.0',
@@ -147,7 +147,7 @@ final class IpTool
      *
      * @link   https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#IPv6_CIDR_blocks
      */
-    public static $v6CidrBlock = [
+    public static array $v6CidrBlock = [
         '128', // 80  Single end-points and loopback
         '127', // 7f  Point-to-point links (inter-router)
         '124', // 7c
@@ -221,14 +221,14 @@ final class IpTool
         foreach((array) $filter as $filterEntry ) {
             if( false !== ( strpos( $filterEntry, self::$AST ) ) ) { // ipv4
                 $filterEntry2 = self::iPv4ConvertToLowerUpperFmt( $filterEntry );
-                list( $lower, $upper ) = explode( self::$DASH, $filterEntry2, 2 );
+                [ $lower, $upper ] = explode( self::$DASH, $filterEntry2, 2 );
                 if( ! self::isValidIPv4( $lower ) || ! self::isValidIPv4( $upper )) {
                     throw new InvalidArgumentException( sprintf( $FMTerr, $filterEntry ));
                 }
                 $filterEntry = $filterEntry2;
             }
             elseif( false !== ( strpos( $filterEntry, self::$SLASH ))) { //split up netmast/cidr
-                list( $ipAddress, $ipNetmaskCidr ) = explode( self::$SLASH, $filterEntry, 2 );
+                [ $ipAddress, $ipNetmaskCidr ] = explode( self::$SLASH, $filterEntry, 2 );
                 switch( true ) {
                     case ( self::isValidIPv4( $ipAddress ) &&
                         ( self::isValidIPv4Cidr( $ipNetmaskCidr ) || self::isValidIPv4( $ipNetmaskCidr ))) :
@@ -236,11 +236,11 @@ final class IpTool
                         if( ! $res ) {
                             throw new InvalidArgumentException( sprintf( $FMTerr, $filterEntry ));
                         }
-                        list( $dummy1, $firstAddr, $lastAddr, $dummy4 ) = $res;
+                        [ $dummy1, $firstAddr, $lastAddr, $dummy4 ] = $res;
                         $filterEntry = $firstAddr . self::$DASH . $lastAddr;
                         break;
                     case ( self::isValidIPv6( $ipAddress ) && self::isValidIPv6Cidr( $ipNetmaskCidr )) :
-                        list( $firstAddr, $lastAddr ) =
+                        [ $firstAddr, $lastAddr ] =
                             self::getIPv6CidrFirstLastBin( $ipAddress, $ipNetmaskCidr, true );
                         if( ! self::isValidIPv6( $firstAddr ) || ! self::isValidIPv6( $lastAddr )) {
                             throw new InvalidArgumentException( sprintf( $FMTerr, $filterEntry ));
@@ -280,11 +280,11 @@ final class IpTool
     /**
      * Return bool true if (valid) IP v4/v6 number match (any element in array of) IP/network range(s)
      *
-     * @param string $ipNum
-     * @param int    $matchIx
+     * @param string   $ipNum
+     * @param null|int  $matchIx
      * @return bool  true on success, $matchIx hold found range array element index
      */
-    public function checkipNumInRange( string $ipNum, int & $matchIx = null ) : bool
+    public function checkipNumInRange( string $ipNum, ? int & $matchIx = null ) : bool
     {
         return self::isIpNumInRange( $ipNum, $this->filter, $matchIx );
     }
@@ -370,9 +370,9 @@ final class IpTool
         if( self::isValidIPv6( $ipNum )) {
             return self::expandIPv6( $ipNum );
         }
-        if(( false !== ( $ipNum = self::expandIPv4( $ipNum ))) &&
-            self::isValidIPv4( $ipNum )) {
-            return $ipNum;
+        if(( false !== ( $ipNum2 = self::expandIPv4( $ipNum ))) &&
+            self::isValidIPv4( $ipNum2 )) {
+            return $ipNum2;
         }
         return false;
     }
@@ -383,15 +383,15 @@ final class IpTool
      * For acceptranges in details, see isIpv4InRange / isIpv6InRange
      * Searches are done in array order
      *
-     * @param string $ipNum
-     * @param array  $acceptRanges
-     * @param int    $matchIx
+     * @param string   $ipNum
+     * @param array    $acceptRanges
+     * @param null|int $matchIx
      * @return bool  true on success, $matchIx hold found range array element index
      */
     public static function isIpNumInRange(
         string $ipNum,
         array $acceptRanges,
-        int & $matchIx = null
+        ? int & $matchIx = null
     ) : bool
     {
         if( self::isValidIPv4( $ipNum )) {
@@ -449,8 +449,8 @@ final class IpTool
      */
     private static function isIPv4withPort( string $ipNum ) : bool
     {
-        return (( 3 == substr_count( $ipNum, self::$DOT )) &&
-            ( 1 == substr_count( $ipNum, self::$COLON )));
+        return (( 3 === substr_count( $ipNum, self::$DOT )) &&
+            ( 1 === substr_count( $ipNum, self::$COLON )));
     }
 
     /**
@@ -549,7 +549,7 @@ final class IpTool
         }
         $hostName = gethostbyaddr( $ipNum );
         if(( false === $hostName ) || // malformed input
-           ( $ipNum == $hostName )) { // on failure
+           ( $ipNum === $hostName )) { // on failure
             return false;
         }
         $extIPs = gethostbynamel( $hostName );
@@ -660,7 +660,7 @@ final class IpTool
     )
     {
         if( false !== strpos( $ipAddress, self::$SLASH )) {
-            list( $ipAddress, $ipNetmaskCidr ) = explode( self::$SLASH, $ipAddress, 2 );
+            [ $ipAddress, $ipNetmaskCidr ] = explode( self::$SLASH, $ipAddress, 2 );
         }
         if( ! self::isValidIPv4( $ipAddress )) {
             return false;
@@ -711,37 +711,42 @@ final class IpTool
      *
      * Searches are done in array order
      *
-     * @param string $ipNum
-     * @param array  $acceptRanges (string[])
-     * @param int    $matchIx
+     * @param string    $ipNum
+     * @param array     $acceptRanges (string[])
+     * @param null|int  $matchIx
      * @return bool  true on success, $matchIx hold found range array element index
      */
     public static function isIPv4InRange(
         string $ipNum,
         array $acceptRanges,
-        int & $matchIx = null
+        ? int & $matchIx = null
     ) : bool
     {
-        foreach( $acceptRanges as $matchIx => $rangeEntry ) {
+        foreach( $acceptRanges as $matchIx2 => $rangeEntry ) {
             switch( true ) {
-                case ( self::$AST == $rangeEntry ) :
+                case ( self::$AST === $rangeEntry ) :
+                    $matchIx = (int) $matchIx2;
                     return true;
                 case ( self::isValidIPv4( $rangeEntry ) &&
-                     ( self::IPv42bin( $rangeEntry ) == self::IPv42bin( $ipNum ))) :
+                     ( self::IPv42bin( $rangeEntry ) === self::IPv42bin( $ipNum ))) :
+                    $matchIx = (int) $matchIx2;
                     return true;
                 case (( false !== ( strpos( $rangeEntry, self::$DASH ))) &&
                     self::iPv4RangeIsLowerUpperFmt( $ipNum, $rangeEntry )) :
+                    $matchIx = (int) $matchIx2;
                     return true;
                 case ( false !== ( strpos( $rangeEntry, self::$AST ))) :
                     if( self::iPv4RangeIsLowerUpperFmt(
                         $ipNum,
                         self::iPv4ConvertToLowerUpperFmt( $rangeEntry )
                     )) {
+                        $matchIx = (int) $matchIx2;
                         return true;
                     }
                     break;
                 case (( false !== ( strpos( $rangeEntry, self::$SLASH ))) &&
                     self::iPv4RangeIsIpOrNetmask( $ipNum, $rangeEntry )) :
+                    $matchIx = (int) $matchIx2;
                     return true;
                 default :
                     break;
@@ -760,10 +765,11 @@ final class IpTool
      */
     private static function iPv4RangeIsIpOrNetmask( string $ipNum, string $rangeEntry ) : bool
     {
-        list( $rangeEntry, $netmask ) = explode( self::$SLASH, $rangeEntry, 2 );
+        [ $rangeEntry, $netmask ] = explode( self::$SLASH, $rangeEntry, 2 );
         $rangeEntry = self::expandIPv4( $rangeEntry );
-        if( false === $rangeEntry )
+        if( false === $rangeEntry ) {
             return false;
+        }
         if( ! self::isValidIPv4( $rangeEntry )) {
             return false;
         }
@@ -797,7 +803,9 @@ final class IpTool
             $netmask = str_replace( self::$AST, self::$ZERO, $netmask );
         }
         $netmask_dec = self::IPv42bin( $netmask );
-        return (( self::IPv42bin( $ipNum ) & $netmask_dec ) == ( self::IPv42bin( $rangeEntry ) & $netmask_dec ));
+        return (
+            ( self::IPv42bin( $ipNum ) & $netmask_dec ) === ( self::IPv42bin( $rangeEntry ) & $netmask_dec )
+        );
     }
 
     /**
@@ -817,7 +825,7 @@ final class IpTool
     {
         $netmaskBin = self::cidr2NetmaskBin((int) $cidr, 32 );
         return (
-            ( self::IPv42bin( $ipNum ) & $netmaskBin ) == ( self::IPv42bin( $rangeEntry ) & $netmaskBin )
+            ( self::IPv42bin( $ipNum ) & $netmaskBin ) === ( self::IPv42bin( $rangeEntry ) & $netmaskBin )
         );
     }
 
@@ -848,7 +856,7 @@ final class IpTool
     private static function iPv4RangeIsLowerUpperFmt( string $ipNum, string $rangeEntry ) : bool
     {
         static $FMTINTunsign = '%u';
-        list( $lower, $upper ) = explode( self::$DASH, $rangeEntry, 2 );
+        [ $lower, $upper ] = explode( self::$DASH, $rangeEntry, 2 );
         if( ! self::isValidIPv4( $lower )) {
             return false;
         }
@@ -879,7 +887,7 @@ final class IpTool
         if( self::isIpv6compressed( $ipNum )) {
             $ipNum = self::expandIPv6( $ipNum );
         }
-        return (bool) false !== filter_var( $ipNum, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 );
+        return ( false !== filter_var( $ipNum, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ));
     }
 
     /**
@@ -892,7 +900,7 @@ final class IpTool
     private static function isIPv6withPort( string $ipNum ) : bool
     {
         $ipNum = trim( $ipNum, self::$DQ );
-        return ( 1 == substr_count( $ipNum, self::$SQC ));
+        return ( 1 === substr_count( $ipNum, self::$SQC ));
     }
 
     /**
@@ -956,7 +964,7 @@ final class IpTool
     {
         static $IPV4PREFIX = '::ffff:';
         $ipNum = self::compressIPv6( $ipNum );
-        if( $IPV4PREFIX != substr( $ipNum, 0, 7 )) {
+        if( 0 !== strpos( $ipNum, $IPV4PREFIX )) {
             return false;
         }
         $ipNum = str_replace( $IPV4PREFIX, null, $ipNum );
@@ -1045,8 +1053,7 @@ final class IpTool
         static $EXPR2 = '$1:';
         static $HEX   = 'hex';
         $hex    = unpack( $Hhex, @inet_pton( $ipNum ));
-        $ipNum  = substr( preg_replace( $EXPR1, $EXPR2, $hex[$HEX] ), 0, -1 );
-        return $ipNum;
+        return substr( preg_replace( $EXPR1, $EXPR2, $hex[$HEX] ), 0, -1 );
     }
 
     /**
@@ -1058,17 +1065,18 @@ final class IpTool
      *   compressing (first found) consecutive hexadecimal fields of zeros using double colon
      *
      * @param string     $ipNum
-     * @param null|bool  $is8BitBlocks default true, force 8 bitBlocks
+     * @param bool|null $is8BitBlocks default true, force 8 bitBlocks
      * @return bool|string  bool false on ipNum error
      */
-    public static function compressIPv6( string $ipNum, $is8BitBlocks = true )
+    public static function compressIPv6( string $ipNum, ? bool $is8BitBlocks = true )
     {
         if( 0 < substr_count( $ipNum, self::$COLON2 )) {
             // is compressed
             return $ipNum;
         }
         $colonCnt = substr_count( $ipNum, self::$COLON );
-        if(( ! IpTool::isValidIP( $ipNum ) && ! isset( $is8BitBlocks )) || empty( $colonCnt )) {
+        if( empty( $colonCnt ) ||
+            ( ! self::isValidIP( $ipNum ) && ! isset( $is8BitBlocks ))) {
             return false;
         }
         if( null === $is8BitBlocks ) {
@@ -1093,10 +1101,11 @@ final class IpTool
                 continue;
             }
             $hextets[]  = $hextet;
-            $emptyIx += 1;
+            ++$emptyIx;
         } // end foreach..
-        if( ! $found || ( 8 != $cntBitblocks )) // no empty bitBlocks OR 1-7 bitblocks
+        if( ! $found || ( 8 !== $cntBitblocks )) { // no empty bitBlocks OR 1-7 bitblocks
             return implode( self::$COLON, $hextets );
+        }
         // get the longest empty hextet
         $longest = 0;
         $longIx  = null;
@@ -1114,7 +1123,7 @@ final class IpTool
             return self::$COLON2 .
                 implode( self::$COLON, array_slice( $hextets, ( $end + 1 )));
         }
-        if( $first == $lastIx ) { // last is empty
+        if( $first === $lastIx ) { // last is empty
             return implode( self::$COLON,$hextets );
         }
         return
@@ -1147,36 +1156,43 @@ final class IpTool
      *
      * Searches are done in array order
      *
-     * @param string $ipNum
-     * @param array  $acceptRanges (string[])
-     * @param int    $matchIx
+     * @param string    $ipNum
+     * @param array     $acceptRanges (string[])
+     * @param null|int  $matchIx
      * @return bool  true on success, $matchIx hold found range array element index
      */
     public static function isIPv6InRange(
         string $ipNum,
         array $acceptRanges,
-        int & $matchIx = null
+        ? int & $matchIx = null
     ) : bool
     {
-        foreach( $acceptRanges as $matchIx => $rangeEntry ) {
+        foreach( $acceptRanges as $matchIx2 => $rangeEntry ) {
             switch( true ) {
-                case ( self::$AST == $rangeEntry ) :
+                case ( self::$AST === $rangeEntry ) :
+                    $matchIx = (int) $matchIx2;
                     return true;
                 case ( false !== ( strpos( $rangeEntry, self::$DASH ))) :
-                    if( false !== self::iPv6IsIpInRange( $ipNum, $rangeEntry ))
+                    if( false !== self::iPv6IsIpInRange( $ipNum, $rangeEntry )) {
+                        $matchIx = (int) $matchIx2;
                         return true;
+                    }
                     break;
                 case ( false !== strpos( $rangeEntry, self::$SLASH )) :
-                    if( false !== self::iPv6RangeIsIpAndNetmask( $ipNum, $rangeEntry ))
+                    if( false !== self::iPv6RangeIsIpAndNetmask( $ipNum, $rangeEntry )) {
+                        $matchIx = (int) $matchIx2;
                         return true;
+                    }
                     break;
                 case ( self::isValidIPv6( $rangeEntry )) :
-                    if( false !== self::iPv6RangeIsIp( $ipNum, $rangeEntry ))
+                    if( false !== self::iPv6RangeIsIp( $ipNum, $rangeEntry )) {
+                        $matchIx = (int) $matchIx2;
                         return true;
+                    }
                     break;
                 default :
                     break;
-            }
+            } // end switch
         }
         $matchIx = null;
         return false;
@@ -1190,7 +1206,7 @@ final class IpTool
      * @return bool  true on success, ip in range
      */
     private static function iPv6IsIpInRange( string $ipNum, string $rangeEntry ) : bool {
-        list( $ipLow, $ipHigh ) = explode( self::$DASH, $rangeEntry, 2 );
+        [ $ipLow, $ipHigh ] = explode( self::$DASH, $rangeEntry, 2 );
         if( ! self::isValidIPv6( $ipLow )) {
             return false;
         }
@@ -1219,7 +1235,7 @@ final class IpTool
         string $rangeEntry
     ) : bool
     {
-        list( $range, $netmask ) = explode( self::$SLASH, $rangeEntry, 2 );
+        [ $range, $netmask ] = explode( self::$SLASH, $rangeEntry, 2 );
         if( ! self::isValidIPv6( $range )) {
             return false;
         }
@@ -1250,7 +1266,7 @@ final class IpTool
     ) : bool
     {
         $ipNumBin = self::IPv62bin( $ipNum );
-        list( $firstAddrBin, $lastAddrBin ) = self::getIPv6CidrFirstLastBin( $rangeEntry, (int) $cidr );
+        [ $firstAddrBin, $lastAddrBin ] = self::getIPv6CidrFirstLastBin( $rangeEntry, (int)$cidr );
         return (( $firstAddrBin <= $ipNumBin ) && ( $ipNumBin <= $lastAddrBin ));
     }
 
@@ -1295,18 +1311,18 @@ final class IpTool
         $pos = 31;
         while( $flexbits > 0 ) {
             // Get the character at this position
-            $orig        = substr( $lastAddrHex, $pos, 1 );
+            $orig        = $lastAddrHex[$pos];
             // Convert it to an integer
             $origval     = hexdec( $orig );
             // OR it with (2^flexbits)-1, with flexbits limited to 4 at a time
-            $newval      = $origval | ( pow( 2, min(4, $flexbits )) - 1 );
+            $newval      = $origval | (( 2 ** min( 4, $flexbits )) - 1 );
             // Convert it back to a hexadecimal character
             $new         = dechex( $newval );
             // And put that character back in the string
             $lastAddrHex = substr_replace( $lastAddrHex, $new, $pos, 1 );
             // We processed one nibble, move to previous position
             $flexbits   -= 4;
-            $pos        -= 1;
+            --$pos;
         }
         // Convert the hexadecimal string to a binary string
         $lastAddrBin = hex2bin( $lastAddrHex );

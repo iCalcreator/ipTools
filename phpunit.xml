@@ -44,33 +44,42 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         syntaxCheck="false"
-         bootstrap="autoload.php"
->
+         bootstrap="autoload.php">
     <testsuites>
         <testsuite name="IpTool test">
             <file>test/IpToolsTest.php</file>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist
-                addUncoveredFilesFromWhitelist="true"
-                processUncoveredFilesFromWhitelist="true"
-        >
+    <coverage
+            includeUncoveredFiles="true"
+            processUncoveredFiles="true"
+            pathCoverage="false"
+            ignoreDeprecatedCodeUnits="false"
+            disableCodeCoverageIgnore="true">
+        <include>
             <file>src/IpTool.php</file>
-        </whitelist>
-    </filter>
+        </include>
+        <!-- Require the PHP Xdebug (2.7.0 or later) and tokenizer extensions-->
+        <!-- Remove or comment after your own choice-->
+        <!-- Note, all output in report/logging will be saved in 'testDocs' folder -->
+        <report>
+            <!-- clover outputFile="testDocs/clover.xml"/ -->
+            <!-- crap4j outputFile="testDocs/crap4j.xml" threshold="50"/ -->
+            <html outputDirectory="testDocs/PHPUnitCoverage" lowUpperBound="60" highLowerBound="80"/>
+            <php outputFile="testDocs/coverage.php"/>
+            <text outputFile="testDocs/coverage.txt" showUncoveredFiles="false" showOnlySummary="false"/>
+            <!-- xml outputDirectory="testDocs/xml-coverage"/ -->
+        </report>
+    </coverage>
     <logging>
-        <log type="coverage-html" target="testDocs/PHPUnitCoverage" lowUpperBound="35" highLowerBound="70"/>
-        <!--
-        <log type="coverage-clover" target="testDocs/testCoverage.xml"/>
-        <log type="coverage-php"    target="testDocs/testCoverage.php"/>
-        <log type="coverage-text"   target="testDocs/PHPUnitReport.txt" showUncoveredFiles="false"/>
-        <log type="json"            target="testDocs/PHPUnitReport.json"/>
-        <log type="tap"             target="testDocs/PHPUnitReport.tap"/>
-        <log type="junit"           target="testDocs/PHPUnitReport.xml" logIncompleteSkipped="false"/>
-        <log type="testdox-html"    target="testDocs/PHPUnitReport.testdox.html"/>
-        <log type="testdox-text"    target="testDocs/PHPUnitReport.testdox.txt"/>
-        -->
+        <!-- Remove or comment after your own choice-->
+        <!-- All logs will be saved in 'testDocs' folder -->
+
+        <!-- junit outputFile="testDocs/junit.xml"/ -->
+        <!-- teamcity outputFile="testDocs/teamcity.txt"/ -->
+        <!-- testdoxHtml outputFile="testDocs/testdox.html"/ -->
+        <!-- testdoxText outputFile="testDocs/testdox.txt"/ -->
+        <!-- testdoxXml outputFile="testDocs/testdox.xml"/ -->
+        <text outputFile="testDocs/logfile.txt"/>
     </logging>
 </phpunit>

@@ -23,6 +23,8 @@ and util services:
 composer require kigkonsult/ipTools
 ~~~
 
+Version 1.4 supports PHP 7.4, 1.3 7.0.
+
 or add 
 ~~~
 require_once '[path/]ipTools/autoload.php';
