@@ -82,24 +82,60 @@ final class IpTool
     private array $filter = [];
 
     /**
-     * internal vars
-     *
+     * @var string
      */
     private static string $AST    = '*';
+
+    /**
+     * @var string
+     */
     private static string $COLON  = ':';
+
+    /**
+     * @var string
+     */
     private static string $COLON2 = '::';
+
+    /**
+     * @var string
+     */
     private static string $DASH   = '-';
+
+    /**
+     * @var string
+     */
     private static string $DOT    = '.';
+
+    /**
+     * @var string
+     */
     private static string $DQ     = '"';
+
+    /**
+     * @var string
+     */
     private static string $SLASH  = '/';
+
+    /**
+     * @var string
+     */
     private static string $SQC    = ']:';
+
+    /**
+     * @var string
+     */
     private static string $SP0    = '';
+
+    /**
+     * @var string
+     */
     private static string $ZERO   = '0';
 
     /**
      * cidr IP v4 block netmask chart
      *
-     * @linc https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#IPv4_CIDR_blocks
+     * @var string[]
+     * @link https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#IPv4_CIDR_blocks
      */
     public static array $v4CidrBlock2netmask = [
         0  => '0.0.0.0',
@@ -145,6 +181,7 @@ final class IpTool
      *  The 16 bits from the 49th to the 64th are for defining subnets.
      *  The last 64 bits are for device (interface) ID's (4 * 16)
      *
+     * @var string[]
      * @link   https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#IPv6_CIDR_blocks
      */
     public static array $v6CidrBlock = [
@@ -186,10 +223,10 @@ final class IpTool
     /**
      * Constructor for calendar object
      *
-     * @param array|string $filter
+     * @param array|string|null $filter
      * @throws InvalidArgumentException
      */
-    public function __construct( $filter = null )
+    public function __construct( array | string $filter = null )
     {
         foreach( (array) $filter as $filterEntry ) {
             $this->addFilter( $filterEntry );
@@ -199,11 +236,11 @@ final class IpTool
     /**
      * Factory method
      *
-     * @param array|string $filter
+     * @param array|string|null $filter
      * @return static
      * @throws InvalidArgumentException
      */
-    public static function factory( $filter = null ) : self
+    public static function factory( array | string $filter = null ) : self
     {
         return new self( $filter );
     }
@@ -215,7 +252,7 @@ final class IpTool
      * @return static
      * @throws InvalidArgumentException
      */
-    public function addFilter( $filter ) : self
+    public function addFilter( array | string $filter ) : self
     {
         static $FMTerr = 'Invalid filter entry \'%s\'';
         foreach((array) $filter as $filterEntry ) {
@@ -365,7 +402,7 @@ final class IpTool
      * @param string $ipNum
      * @return string|bool  false on error
      */
-    public static function expand( string $ipNum )
+    public static function expand( string $ipNum ) : bool | string
     {
         if( self::isValidIPv6( $ipNum )) {
             return self::expandIPv6( $ipNum );
@@ -464,7 +501,7 @@ final class IpTool
     {
         if( self::isIPv4withPort( $ipNum )) {
             $ipNumparts = explode( self::$COLON, $ipNum, 2 );
-            return ctype_digit((string) $ipNumparts[1] );
+            return ctype_digit( $ipNumparts[1] );
         }
         return false;
     }
@@ -505,7 +542,7 @@ final class IpTool
      * @param string $ipNum
      * @return int|false int on success, bool false on IP binary number error
      */
-    public static function IPv42bin( string $ipNum )
+    public static function IPv42bin( string $ipNum ) : bool | int
     {
         return ip2long( $ipNum );
     }
@@ -516,7 +553,7 @@ final class IpTool
      * @param int $IPbin
      * @return string|bool string on success, bool false if IP is invalid
      */
-    public static function bin2IPv4( int $IPbin )
+    public static function bin2IPv4( int $IPbin ) : bool | string
     {
         return long2ip( $IPbin );
     }
@@ -531,7 +568,7 @@ final class IpTool
      * @param int|string $dec
      * @return string
      */
-    public static function decbin32( $dec ) : string
+    public static function decbin32( int | string $dec ) : string
     {
         return str_pad( decbin((int) $dec ), 32, self::$ZERO, STR_PAD_LEFT );
     }
@@ -552,11 +589,10 @@ final class IpTool
            ( $ipNum === $hostName )) { // on failure
             return false;
         }
-        $extIPs = gethostbynamel( $hostName );
-        if( false === $extIPs ) {     // can't resolve
+        if( false === ( $extIPs = gethostbynamel( $hostName ))) {  // can't resolve
             return false;
         }
-        return in_array( $ipNum, $extIPs );
+        return in_array( $ipNum, $extIPs, true );
     }
 
     /**
@@ -565,13 +601,13 @@ final class IpTool
      * @param string $ipNum
      * @return string|bool  false on error
      */
-    public static function expandIPv4( string $ipNum )
+    public static function expandIPv4( string $ipNum ) : bool | string
     {
         static $FMTIPno = '%u.%u.%u.%u';
-        if( false !== strpos( $ipNum, self::$COLON )) {
+        if( str_contains( $ipNum, self::$COLON ) ) {
             return false;
         }
-        if(( false === strpos( $ipNum, self::$DOT )) &&
+        if(( ! str_contains( $ipNum, self::$DOT ) ) &&
             ( ! ctype_digit( $ipNum ) || ( 255 < $ipNum ))) {
             return false;
         }
@@ -596,7 +632,7 @@ final class IpTool
      * @param int|string $cidr
      * @return bool
      */
-    public static function isValidIPv4Cidr( $cidr ) : bool
+    public static function isValidIPv4Cidr( int | string $cidr ) : bool
     {
         return isset( self::$v4CidrBlock2netmask[$cidr] );
     }
@@ -608,7 +644,7 @@ final class IpTool
      * @param string $cidr
      * @return string|bool  false on not found
      */
-    public static function ipv4Cidr2Netmask( string $cidr )
+    public static function ipv4Cidr2Netmask( string $cidr ) : bool | string
     {
         return ( self::isValidIPv4Cidr( $cidr ))
             ? self::$v4CidrBlock2netmask[$cidr]
@@ -622,7 +658,7 @@ final class IpTool
      * @param string $netmask
      * @return string|bool  false on not found
      */
-    public static function ipv4Netmask2Cidr( string $netmask )
+    public static function ipv4Netmask2Cidr( string $netmask ) : bool | string
     {
         return ( in_array( $netmask, self::$v4CidrBlock2netmask ))
             ? array_keys( self::$v4CidrBlock2netmask, $netmask )[0]
@@ -636,7 +672,7 @@ final class IpTool
      * @param int $cidr
      * @return string|bool   false on error
      */
-    public static function getNetworkFromIpv4Cidr( string $ipNum, int $cidr )
+    public static function getNetworkFromIpv4Cidr( string $ipNum, int $cidr ) : bool | string
     {
         return self::bin2IPv4(
             ( self::IPv42bin( $ipNum )) & (( -1 << ( 32 - $cidr )))
@@ -657,9 +693,9 @@ final class IpTool
         string $ipAddress,
         $ipNetmaskCidr = null,
         bool $outputAsIpNum = false
-    )
+    ) : array | bool
     {
-        if( false !== strpos( $ipAddress, self::$SLASH )) {
+        if( str_contains( $ipAddress, self::$SLASH ) ) {
             [ $ipAddress, $ipNetmaskCidr ] = explode( self::$SLASH, $ipAddress, 2 );
         }
         if( ! self::isValidIPv4( $ipAddress )) {
@@ -712,7 +748,7 @@ final class IpTool
      * Searches are done in array order
      *
      * @param string    $ipNum
-     * @param array     $acceptRanges (string[])
+     * @param string[]  $acceptRanges
      * @param null|int  $matchIx
      * @return bool  true on success, $matchIx hold found range array element index
      */
@@ -766,20 +802,19 @@ final class IpTool
     private static function iPv4RangeIsIpOrNetmask( string $ipNum, string $rangeEntry ) : bool
     {
         [ $rangeEntry, $netmask ] = explode( self::$SLASH, $rangeEntry, 2 );
-        $rangeEntry = self::expandIPv4( $rangeEntry );
-        if( false === $rangeEntry ) {
+        if( false === ( $rangeEntry2 = self::expandIPv4( $rangeEntry ))) {
             return false;
         }
-        if( ! self::isValidIPv4( $rangeEntry )) {
+        if( ! self::isValidIPv4( $rangeEntry2 )) {
             return false;
         }
-        if( false !== strpos( $netmask, self::$DOT )) {
+        if( str_contains( $netmask, self::$DOT ) ) {
             // netmask is a 255.255.0.0 format
-            return self::iPv4NetmaskIsIPFormat( $ipNum, $rangeEntry, $netmask );
+            return self::iPv4NetmaskIsIPFormat( $ipNum, $rangeEntry2, $netmask );
         }
         if( self::isValidIPv4Cidr( $netmask )) {
             // netmask is a cidr size block
-            return self::iPv4NetmaskIsCidrSizeBlock( $ipNum, $rangeEntry, $netmask );
+            return self::iPv4NetmaskIsCidrSizeBlock( $ipNum, $rangeEntry2, $netmask );
         }
         return false;
     }
@@ -799,7 +834,7 @@ final class IpTool
         string $netmask
     ) : bool
     {
-        if( false !== strpos( $netmask, self::$AST )) {
+        if( str_contains( $netmask, self::$AST ) ) {
             $netmask = str_replace( self::$AST, self::$ZERO, $netmask );
         }
         $netmask_dec = self::IPv42bin( $netmask );
@@ -814,13 +849,13 @@ final class IpTool
      *
      * @param  string $ipNum
      * @param  string $rangeEntry
-     * @param  int|string $cidr
+     * @param int|string $cidr
      * @return bool  true on success, ip in range
      */
     private static function iPv4NetmaskIsCidrSizeBlock(
         string $ipNum,
         string $rangeEntry,
-        $cidr
+        int | string $cidr
     ) : bool
     {
         $netmaskBin = self::cidr2NetmaskBin((int) $cidr, 32 );
@@ -881,7 +916,7 @@ final class IpTool
         if( self::hasIPv6port( $ipNum )) {
             $ipNum = self::getIPv6withoutPort( $ipNum );
         }
-        if( false === strpos( $ipNum, self::$COLON )) {
+        if( ! str_contains( $ipNum, self::$COLON ) ) {
             return false;
         }
         if( self::isIpv6compressed( $ipNum )) {
@@ -914,7 +949,7 @@ final class IpTool
     {
         if( self::isIPv6withPort( $ipNum )) {
             $ipNumparts = explode( self::$SQC, trim( $ipNum, self::$DQ ), 2 );
-            return ctype_digit((string) $ipNumparts[1] );
+            return ctype_digit( $ipNumparts[1] );
         }
         return false;
     }
@@ -963,12 +998,12 @@ final class IpTool
     public static function isIPv4MappedIPv6( string $ipNum ) : bool
     {
         static $IPV4PREFIX = '::ffff:';
-        $ipNum = self::compressIPv6( $ipNum );
-        if( 0 !== strpos( $ipNum, $IPV4PREFIX )) {
+        if( false === ( $ipNum2 = self::compressIPv6( $ipNum )) ||
+            ! str_starts_with( $ipNum2, $IPV4PREFIX ) ) {
             return false;
         }
-        $ipNum = str_replace( $IPV4PREFIX, null, $ipNum );
-        return self::isValidIPv4( $ipNum );
+        $ipNum3 = str_replace( $IPV4PREFIX, null, $ipNum2 );
+        return self::isValidIPv4( $ipNum3 );
     }
 
     /**
@@ -989,7 +1024,7 @@ final class IpTool
      * @param string $IPbin
      * @return string|bool (binary) string on success, bool false on IP binary number error
      */
-    public static function bin2IPv6( string $IPbin )
+    public static function bin2IPv6( string $IPbin ) : bool | string
     {
         return @inet_ntop( $IPbin );
 //        return @inet_ntop( pack( self::$A16, $IPbin ));
@@ -1031,7 +1066,7 @@ final class IpTool
      */
     public static function isIpv6compressed( string $ipNum ) : bool
     {
-        return ( false !== strpos( $ipNum, self::$COLON2 ));
+        return ( str_contains( $ipNum, self::$COLON2 ) );
     }
 
     /**
@@ -1068,7 +1103,7 @@ final class IpTool
      * @param bool|null $is8BitBlocks default true, force 8 bitBlocks
      * @return bool|string  bool false on ipNum error
      */
-    public static function compressIPv6( string $ipNum, ? bool $is8BitBlocks = true )
+    public static function compressIPv6( string $ipNum, ? bool $is8BitBlocks = true ) : bool | string
     {
         if( 0 < substr_count( $ipNum, self::$COLON2 )) {
             // is compressed
@@ -1178,7 +1213,7 @@ final class IpTool
                         return true;
                     }
                     break;
-                case ( false !== strpos( $rangeEntry, self::$SLASH )) :
+                case ( str_contains( $rangeEntry, self::$SLASH ) ) :
                     if( false !== self::iPv6RangeIsIpAndNetmask( $ipNum, $rangeEntry )) {
                         $matchIx = (int) $matchIx2;
                         return true;
@@ -1256,13 +1291,13 @@ final class IpTool
      *
      * @param  string $ipNum
      * @param  string $rangeEntry
-     * @param  int|string $cidr
+     * @param int|string $cidr
      * @return bool  true on success, ip in range
      */
     private static function iPv6NetmaskIsCidrSizeBlock(
         string $ipNum,
         string $rangeEntry,
-        $cidr
+        int | string $cidr
     ) : bool
     {
         $ipNumBin = self::IPv62bin( $ipNum );

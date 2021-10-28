@@ -190,14 +190,14 @@ class IpToolsTest extends TestCase
      *
      * @param int    $case
      * @param string $toExpand
-     * @param string|bool $expected
+     * @param bool|string $expected
      */
-    public function iPv4expandTest( int $case, string $toExpand, $expected ) : void
+    public function iPv4expandTest( int $case, string $toExpand, bool | string $expected ) : void
     {
         $this->assertEquals(
             $expected,
             IpTool::expand( $toExpand ),
-            "error in case {$case}"
+            "error in case $case"
         );
     }
 
@@ -513,14 +513,17 @@ class IpToolsTest extends TestCase
     {
         $FMTIP   = '192.168.%d.1';
         $FMTcidr = '%s/%d';
-        $FMTerr  = 'Testing error (case #%s) with ip: %s with netmask %s';
+        $FMTerr1 = 'Testing error (case #%s-$d) with cidr: %s with netmask cidr %s';
+        $FMTerr2 = 'Testing error (case #%s-$d) with ip: %s with netmask %s';
         foreach( IpTool::$v4CidrBlock2netmask as $cidr => $netmask ) {
             if( empty( $cidr )) {
                 continue;
             }
+            $cidr2 = IpTool::ipv4Netmask2Cidr( IpTool::ipv4Cidr2Netmask( $cidr ));
             $this->assertEquals(
                 $cidr,
-                IpTool::ipv4Netmask2Cidr( IpTool::ipv4Cidr2Netmask( $cidr ))
+                $cidr2,
+                sprintf( $FMTerr1, $cidr, 1, $cidr, $cidr2 )
             );
             $testIP = sprintf( $FMTIP, $cidr );
             $this->assertTrue(
@@ -529,11 +532,11 @@ class IpToolsTest extends TestCase
                     [ sprintf( $FMTcidr, $testIP, $cidr ) ],
                     $matchIx
                 ),
-                sprintf( $FMTerr, $cidr, $testIP, $cidr )
+                sprintf( $FMTerr2, $cidr, 2, $testIP, $cidr )
             );
             $this->assertNotNull(
                 $matchIx,
-                sprintf( $FMTerr, $cidr, $testIP, $cidr )
+                sprintf( $FMTerr2, $cidr, 3, $testIP, $cidr )
             );
         }
     }
@@ -1098,11 +1101,11 @@ class IpToolsTest extends TestCase
     public function iPv6_expandTest( int $case, string $condensedIP ) : void
     {
         $exandedIp = IpTool::expand( $condensedIP );
-        $this->assertTrue( IpTool::isValidIPv6( $exandedIp ), "error case #{$case}" );
+        $this->assertTrue( IpTool::isValidIPv6( $exandedIp ), "error case #$case" );
         $this->assertEquals(
             IpTool::IPv62bin( $condensedIP ),
             IpTool::IPv62bin( $exandedIp ),
-            "error case #{$case}"
+            "error case #$case"
         );
     }
 
@@ -1188,17 +1191,17 @@ class IpToolsTest extends TestCase
         else {
             $this->assertTrue(
                 IpTool::isValidIPv6( $condensedIP ),
-                "error 21 in case #{$case}, {$condensedIP} not valid ipV6"
+                "error 21 in case #$case, $condensedIP not valid ipV6"
             );
             $this->assertEquals(
                 IpTool::IPv62bin( $IPtoCompress ),
                 IpTool::IPv62bin( $condensedIP ),
-                "error 22 in case #{$case} {$IPtoCompress} <-> {$condensedIP}"
+                "error 22 in case #$case $IPtoCompress <-> $condensedIP"
             );
             $this->assertEquals(
                 IpTool::IPv62bin( $compareIP ),
                 IpTool::IPv62bin( $condensedIP ),
-                "error 23 in case #{$case} {$compareIP} <-> {$condensedIP}"
+                "error 23 in case #$case $compareIP <-> $condensedIP"
             );
         }
     }
@@ -1659,20 +1662,20 @@ class IpToolsTest extends TestCase
         $strangeIp = 'stringIp';
         $this->assertFalse(
             IpTool::hasIPport( $strangeIp ),
-            "case 1 {$strangeIp} has no port"
+            "case 1 $strangeIp has no port"
         );
         $this->assertEmpty(
             IpTool::getIPport( $strangeIp ),
-            "case 2 {$strangeIp} has no port"
+            "case 2 $strangeIp has no port"
         );
         $this->assertEquals(
             $strangeIp,
             IpTool::getIPwithoutPort( $strangeIp ),
-            "case 3 {$strangeIp} has no port"
+            "case 3 $strangeIp has no port"
         );
         $this->assertFalse(
             IpTool::expand( $strangeIp ),
-            "case 4 {$strangeIp} can't expand..."
+            "case 4 $strangeIp can't expand..."
         );
     }
 
@@ -1772,14 +1775,14 @@ class IpToolsTest extends TestCase
      *
      * @param int    $case
      * @param array $baseFilterArr,
-     * @param string|array $addFilterEntry,
+     * @param array|string $addFilterEntry,
      * @param string $IpNumToTest
      */
     public function classfactoryTest(
-        int    $case,
-        array  $baseFilterArr,
-               $addFilterEntry,
-        string $IpNumToTest
+        int            $case,
+        array          $baseFilterArr,
+        array | string $addFilterEntry,
+        string         $IpNumToTest
     ) : void
     {
         $matchIx = null;
@@ -1787,7 +1790,7 @@ class IpToolsTest extends TestCase
             Iptool::factory( $baseFilterArr )
                   ->addFilter( $addFilterEntry )
                   ->checkIPnumInRange( $IpNumToTest, $matchIx ),
-            " error case #3900{$case}"
+            " error case #3900$case"
         );
         $this->assertNotNull( $matchIx );
     }
@@ -1801,14 +1804,14 @@ class IpToolsTest extends TestCase
      *
      * @param int          $case
      * @param array|null $baseFilterArr,
-     * @param string|array $addFilterEntry,
+     * @param array|string $addFilterEntry,
      * @param string       $IpNumToTest
      */
     public function classInstanceTest(
-        int    $case,
-        ?array $baseFilterArr,
-               $addFilterEntry,
-        string $IpNumToTest
+        int            $case,
+        ?array         $baseFilterArr,
+        array | string $addFilterEntry,
+        string         $IpNumToTest
     ) : void
     {
         $ipValidator = new Iptool( $baseFilterArr );
@@ -1816,7 +1819,7 @@ class IpToolsTest extends TestCase
         $this->assertTrue(
             $ipValidator->addFilter( $addFilterEntry )
                   ->checkIPnumInRange( $IpNumToTest, $matchIx ),
-            " error case #4000{$case}"
+            " error case #4000$case"
         );
         $this->assertNotNull( $matchIx );
 

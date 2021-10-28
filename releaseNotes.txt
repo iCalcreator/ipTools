@@ -1,4 +1,7 @@
 
-1.2
-  PHP 7+
-  IpTool::compressIPv6() bug
+1.2 PHP 7+
+    IpTool::compressIPv6() bug
+
+1.4 PHP 7.4
+
+1.6 PHP 8.0

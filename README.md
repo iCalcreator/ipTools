@@ -23,7 +23,7 @@ and util services:
 composer require kigkonsult/ipTools
 ~~~
 
-Version 1.4 supports PHP 7.4, 1.3 7.0.
+Version 1.6 supports PHP 8.0. 1.4 7.4, 1.3 7.0.
 
 or add 
 ~~~
